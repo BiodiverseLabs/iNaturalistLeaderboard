@@ -365,41 +365,51 @@ def main():
         if user.get('observations_count'):
             st.caption(f"Profile shows: {user['observations_count']:,}")
         
-        # Detailed species lists for observers
+        # Detailed species lists for observers - show only the active one
+        active_observer_rank = None
         for rank in [1, 2, 3]:
-            if st.session_state.show_observer_details[rank] and st.session_state.observer_rankings[rank]:
-                st.write("---")
-                rank_labels = {1: "🥇 #1", 2: "🥈 #2", 3: "🥉 #3"}
-                st.subheader(f"👁️ Species Where User is {rank_labels[rank]} Observer Globally")
-                df_observer = pd.DataFrame(st.session_state.observer_rankings[rank])
-                if not df_observer.empty:
-                    # Format the dataframe for better display
-                    display_cols = ['scientific_name', 'common_name', 'observation_count', 'rank']
-                    df_display = df_observer[display_cols].copy()
-                    df_display.columns = ['Scientific Name', 'Common Name', 'Observations', 'Taxonomic Rank']
-                    df_display['Common Name'] = df_display['Common Name'].fillna('No common name')
-                    st.dataframe(df_display, use_container_width=True)
-                    st.caption(f"Showing {len(df_observer)} species where this user is ranked #{rank} globally for observations")
-                else:
-                    st.info("No detailed data available.")
+            if st.session_state.show_observer_details[rank]:
+                active_observer_rank = rank
+                break
         
-        # Detailed species lists for identifiers
+        if active_observer_rank and st.session_state.observer_rankings[active_observer_rank]:
+            st.write("---")
+            rank_labels = {1: "🥇 #1", 2: "🥈 #2", 3: "🥉 #3"}
+            st.subheader(f"👁️ Species Where User is {rank_labels[active_observer_rank]} Observer Globally")
+            df_observer = pd.DataFrame(st.session_state.observer_rankings[active_observer_rank])
+            if not df_observer.empty:
+                # Format the dataframe for better display
+                display_cols = ['scientific_name', 'common_name', 'observation_count', 'rank']
+                df_display = df_observer[display_cols].copy()
+                df_display.columns = ['Scientific Name', 'Common Name', 'Observations', 'Taxonomic Rank']
+                df_display['Common Name'] = df_display['Common Name'].fillna('No common name')
+                st.dataframe(df_display, use_container_width=True)
+                st.caption(f"Showing {len(df_observer)} species where this user is ranked #{active_observer_rank} globally for observations")
+            else:
+                st.info("No detailed data available.")
+        
+        # Detailed species lists for identifiers - show only the active one
+        active_identifier_rank = None
         for rank in [1, 2, 3]:
-            if st.session_state.show_identifier_details[rank] and st.session_state.identifier_rankings[rank]:
-                st.write("---")
-                rank_labels = {1: "🥇 #1", 2: "🥈 #2", 3: "🥉 #3"}
-                st.subheader(f"🏷️ Species Where User is {rank_labels[rank]} Identifier Globally")
-                df_identifier = pd.DataFrame(st.session_state.identifier_rankings[rank])
-                if not df_identifier.empty:
-                    # Format the dataframe for better display
-                    display_cols = ['scientific_name', 'common_name', 'identification_count', 'rank']
-                    df_display = df_identifier[display_cols].copy()
-                    df_display.columns = ['Scientific Name', 'Common Name', 'Identifications', 'Taxonomic Rank']
-                    df_display['Common Name'] = df_display['Common Name'].fillna('No common name')
-                    st.dataframe(df_display, use_container_width=True)
-                    st.caption(f"Showing {len(df_identifier)} species where this user is ranked #{rank} globally for identifications")
-                else:
-                    st.info("No detailed data available.")
+            if st.session_state.show_identifier_details[rank]:
+                active_identifier_rank = rank
+                break
+        
+        if active_identifier_rank and st.session_state.identifier_rankings[active_identifier_rank]:
+            st.write("---")
+            rank_labels = {1: "🥇 #1", 2: "🥈 #2", 3: "🥉 #3"}
+            st.subheader(f"🏷️ Species Where User is {rank_labels[active_identifier_rank]} Identifier Globally")
+            df_identifier = pd.DataFrame(st.session_state.identifier_rankings[active_identifier_rank])
+            if not df_identifier.empty:
+                # Format the dataframe for better display
+                display_cols = ['scientific_name', 'common_name', 'identification_count', 'rank']
+                df_display = df_identifier[display_cols].copy()
+                df_display.columns = ['Scientific Name', 'Common Name', 'Identifications', 'Taxonomic Rank']
+                df_display['Common Name'] = df_display['Common Name'].fillna('No common name')
+                st.dataframe(df_display, use_container_width=True)
+                st.caption(f"Showing {len(df_identifier)} species where this user is ranked #{active_identifier_rank} globally for identifications")
+            else:
+                st.info("No detailed data available.")
     
     # Footer
     st.write("---")
