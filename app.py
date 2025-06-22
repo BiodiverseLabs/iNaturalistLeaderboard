@@ -88,11 +88,21 @@ def fetch_user_data(username):
         total_identifier_species = sum(len(species_list) for species_list in identifier_rankings.values())
         identifier_status.success(f"✅ Found {len(identifier_rankings[1])} #1, {len(identifier_rankings[2])} #2, {len(identifier_rankings[3])} #3 identifier rankings")
         
-        # Update session state
+        # Clear old session state and set fresh data
         st.session_state.user_data = user_info
         st.session_state.total_observations = total_obs
-        st.session_state.observer_rankings = observer_rankings
-        st.session_state.identifier_rankings = identifier_rankings
+        
+        # Ensure clean rankings data (no references to old data)
+        st.session_state.observer_rankings = {
+            1: list(observer_rankings[1]),  # Create new lists, not references
+            2: list(observer_rankings[2]),
+            3: list(observer_rankings[3])
+        }
+        st.session_state.identifier_rankings = {
+            1: list(identifier_rankings[1]),
+            2: list(identifier_rankings[2]),
+            3: list(identifier_rankings[3])
+        }
         
         # Clean up old cache entries periodically
         if hasattr(api_client, 'db') and api_client.db:
