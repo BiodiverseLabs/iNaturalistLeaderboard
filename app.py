@@ -28,6 +28,8 @@ if 'show_identifier_details' not in st.session_state:
     st.session_state.show_identifier_details = {1: False, 2: False, 3: False}
 if 'cached_data' not in st.session_state:
     st.session_state.cached_data = False
+if 'admin_authenticated' not in st.session_state:
+    st.session_state.admin_authenticated = False
 
 # Initialize API client
 api_client = iNaturalistAPI()
