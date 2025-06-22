@@ -201,6 +201,7 @@ class iNaturalistAPI:
             
             rankings = {1: [], 2: [], 3: []}
             total_species = len(user_species)
+            processed_taxons = set()  # Track processed taxons to avoid duplicates
             
             # For each species, check the user's global ranking
             for i, species in enumerate(user_species):
@@ -213,6 +214,20 @@ class iNaturalistAPI:
                     if progress_callback:
                         progress_callback(i + 1, total_species, 0)
                     continue
+                
+                # Skip if we\'ve already processed this taxon (avoid duplicates)
+                if taxon_id in processed_taxons:
+                    if progress_callback:
+                        progress_callback(i + 1, total_species, 0)
+                    continue
+                processed_taxons.add(taxon_id)
+                
+                # Skip if we\'ve already processed this taxon (avoid duplicates)
+                if taxon_id in processed_taxons:
+                    if progress_callback:
+                        progress_callback(i + 1, total_species, 0)
+                    continue
+                processed_taxons.add(taxon_id)
                 
                 # Update progress BEFORE API call to avoid counting during retries
                 if progress_callback:
@@ -311,6 +326,7 @@ class iNaturalistAPI:
             
             rankings = {1: [], 2: [], 3: []}
             total_species = len(user_species)
+            processed_taxons = set()  # Track processed taxons to avoid duplicates
             
             # For each species, check the user's global ranking
             for i, species in enumerate(user_species):
@@ -323,6 +339,20 @@ class iNaturalistAPI:
                     if progress_callback:
                         progress_callback(i + 1, total_species, 0)
                     continue
+                
+                # Skip if we\'ve already processed this taxon (avoid duplicates)
+                if taxon_id in processed_taxons:
+                    if progress_callback:
+                        progress_callback(i + 1, total_species, 0)
+                    continue
+                processed_taxons.add(taxon_id)
+                
+                # Skip if we\'ve already processed this taxon (avoid duplicates)
+                if taxon_id in processed_taxons:
+                    if progress_callback:
+                        progress_callback(i + 1, total_species, 0)
+                    continue
+                processed_taxons.add(taxon_id)
                 
                 # Update progress BEFORE API call to avoid counting during retries
                 if progress_callback:

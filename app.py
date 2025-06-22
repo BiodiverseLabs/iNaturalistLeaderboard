@@ -36,6 +36,9 @@ def reset_session_state():
     st.session_state.total_observations = 0
     st.session_state.show_observer_details = {1: False, 2: False, 3: False}
     st.session_state.show_identifier_details = {1: False, 2: False, 3: False}
+    
+    # Force clear any cached data to ensure fresh results
+    st.cache_data.clear()
 
 def fetch_user_data(username):
     """Fetch comprehensive user data from iNaturalist API"""
