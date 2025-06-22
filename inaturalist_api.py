@@ -53,15 +53,45 @@ class iNaturalistAPI:
             except requests.exceptions.HTTPError as e:
                 if response.status_code == 429 and attempt < retry_count - 1:
                     continue
-                st.error(f"API request failed for {endpoint}: {str(e)}")
-                if response.status_code == 429:
-                    st.error(f"Rate limit exceeded for endpoint: {endpoint}")
+                
+                # Enhanced error logging
+                error_details = [
+                    f"Endpoint: {endpoint}",
+                    f"Status: {response.status_code}",
+                    f"Error: {str(e)}",
+                    f"Attempt: {attempt + 1}/{retry_count}"
+                ]
+                
+                # Log response headers
+                if hasattr(response, 'headers'):
+                    relevant_headers = {k: v for k, v in response.headers.items() 
+                                      if any(keyword in k.lower() for keyword in ['rate', 'limit', 'retry', 'content-type'])}
+                    if relevant_headers:
+                        error_details.append(f"Headers: {relevant_headers}")
+                
+                # Log response body if small enough
+                try:
+                    if hasattr(response, 'text') and len(response.text) < 500:
+                        error_details.append(f"Response: {response.text}")
+                except:
+                    pass
+                
+                st.error(f"API request failed: {' | '.join(error_details)}")
                 raise
             except requests.exceptions.RequestException as e:
                 if attempt < retry_count - 1:
+                    st.warning(f"Request failed (attempt {attempt + 1}/{retry_count}): {str(e)}. Retrying in 1 second...")
                     time.sleep(1)  # Brief wait before retry
                     continue
-                st.error(f"API request failed: {str(e)}")
+                
+                # Enhanced error logging for final failure
+                error_details = [
+                    f"Endpoint: {endpoint}",
+                    f"Error Type: {type(e).__name__}",
+                    f"Error: {str(e)}",
+                    f"Final attempt: {attempt + 1}/{retry_count}"
+                ]
+                st.error(f"API request failed after {retry_count} attempts: {' | '.join(error_details)}")
                 raise
             except Exception as e:
                 st.error(f"Unexpected error: {str(e)}")
@@ -214,7 +244,13 @@ class iNaturalistAPI:
             return rankings
             
         except Exception as e:
-            st.error(f"Error fetching observer rankings: {str(e)}")
+            error_details = [
+                f"Function: get_observer_rankings",
+                f"User ID: {user_id}",
+                f"Error Type: {type(e).__name__}",
+                f"Error: {str(e)}"
+            ]
+            st.error(f"Observer rankings failed: {' | '.join(error_details)}")
             return {1: [], 2: [], 3: []}
     
     def get_user_identifications_by_species(self, user_id: int, limit: int = 200) -> List[Dict]:
@@ -328,7 +364,13 @@ class iNaturalistAPI:
             return rankings
             
         except Exception as e:
-            st.error(f"Error fetching identifier rankings: {str(e)}")
+            error_details = [
+                f"Function: get_identifier_rankings",
+                f"User ID: {user_id}",
+                f"Error Type: {type(e).__name__}",
+                f"Error: {str(e)}"
+            ]
+            st.error(f"Identifier rankings failed: {' | '.join(error_details)}")
             return {1: [], 2: [], 3: []}
     
     def get_species_observers_leaderboard(self, taxon_id: int, place_id: Optional[int] = None) -> List[Dict]:
@@ -359,7 +401,14 @@ class iNaturalistAPI:
             return results
             
         except Exception as e:
-            st.error(f"Error fetching species observers leaderboard: {str(e)}")
+            error_details = [
+                f"Function: get_species_observers_leaderboard",
+                f"Taxon ID: {taxon_id}",
+                f"Place ID: {place_id}",
+                f"Error Type: {type(e).__name__}",
+                f"Error: {str(e)}"
+            ]
+            st.error(f"Species observers leaderboard failed: {' | '.join(error_details)}")
             return []
     
     def get_species_identifiers_leaderboard(self, taxon_id: int, place_id: Optional[int] = None) -> List[Dict]:
@@ -389,5 +438,12 @@ class iNaturalistAPI:
             return results
             
         except Exception as e:
-            st.error(f"Error fetching species identifiers leaderboard: {str(e)}")
+            error_details = [
+                f"Function: get_species_identifiers_leaderboard",
+                f"Taxon ID: {taxon_id}",
+                f"Place ID: {place_id}",
+                f"Error Type: {type(e).__name__}",
+                f"Error: {str(e)}"
+            ]
+            st.error(f"Species identifiers leaderboard failed: {' | '.join(error_details)}")
             return []

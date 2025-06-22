@@ -79,7 +79,14 @@ class DatabaseManager:
             self.session.add(cache_entry)
             self.session.commit()
         except Exception as e:
-            st.warning(f"Failed to cache leaderboard data: {str(e)}")
+            error_details = [
+                f"Function: cache_species_leaderboard",
+                f"Taxon ID: {taxon_id}",
+                f"Type: {leaderboard_type}",
+                f"Data size: {len(data) if data else 0} items",
+                f"Error: {str(e)}"
+            ]
+            st.warning(f"Database cache failed: {' | '.join(error_details)}")
             self.session.rollback()
     
     def get_user_species_cache(self, user_id: int, cache_type: str, max_age_days: int = 7):
@@ -114,7 +121,14 @@ class DatabaseManager:
             self.session.add(cache_entry)
             self.session.commit()
         except Exception as e:
-            st.warning(f"Failed to cache user species data: {str(e)}")
+            error_details = [
+                f"Function: cache_user_species",
+                f"User ID: {user_id}",
+                f"Cache type: {cache_type}",
+                f"Data size: {len(data) if data else 0} items",
+                f"Error: {str(e)}"
+            ]
+            st.warning(f"User cache failed: {' | '.join(error_details)}")
             self.session.rollback()
     
     def cleanup_old_cache(self, max_age_days: int = 7):
