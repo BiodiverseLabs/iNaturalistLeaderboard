@@ -267,10 +267,47 @@ def display_species_panel(title, species_list, detail_key, icon):
     else:
         st.info(f"No species found where user is top {detail_key.replace('_', ' ')}.")
 
+def get_cached_users():
+    """Get list of users with cached data"""
+    try:
+        if hasattr(api_client, 'db') and api_client.db:
+            from sqlalchemy import text
+            cached_users = api_client.db.session.execute(
+                text('SELECT username, created_at FROM user_rankings_cache ORDER BY created_at DESC')
+            ).fetchall()
+            return [(user[0], user[1]) for user in cached_users]
+    except:
+        pass
+    return []
+
 def main():
     # Header
-    st.title("🔍 iNaturalist User Leaderboards")
-    st.markdown("Enter an iNaturalist username to view their leaderboard statistics")
+    st.title("🏆 iNaturalist User Leaderboards Dashboard")
+    st.markdown("Discover where users rank globally as observers and identifiers for different species.")
+    
+    # Show cached users button (standalone)
+    cached_users = get_cached_users()
+    if cached_users:
+        if st.button("📋 Show Users with Leaderboard Data", help="View users already processed"):
+            st.session_state.show_cached_users = not st.session_state.get('show_cached_users', False)
+    
+    # Display cached users list
+    if st.session_state.get('show_cached_users', False) and cached_users:
+        st.markdown("### 📊 Users with Cached Leaderboard Data")
+        
+        for username, created_at in cached_users:
+            col1, col2, col3 = st.columns([2, 2, 1])
+            with col1:
+                st.text(f"@{username}")
+            with col2:
+                st.text(f"Processed: {created_at.strftime('%Y-%m-%d')}")
+            with col3:
+                if st.button("Load", key=f"load_{username}"):
+                    reset_session_state()
+                    if fetch_user_data(username):
+                        st.session_state.show_cached_users = False
+                        st.rerun()
+        st.markdown("---")
     
     # Username input
     col1, col2 = st.columns([3, 1])
@@ -286,12 +323,36 @@ def main():
         st.write("")  # Add some spacing
         search_button = st.button("Search", type="primary", use_container_width=True)
     
-    # Handle search
+    # Handle search with admin control
     if search_button and username:
+        username = username.strip()
         reset_session_state()
-        if fetch_user_data(username):
-            st.success(f"Data loaded successfully for user: {username}")
-            st.rerun()
+        
+        # Check if user is cached first
+        if hasattr(api_client, 'db') and api_client.db:
+            cached_data = api_client.db.get_user_rankings_cache(username)
+            if cached_data:
+                # User is cached, load directly
+                if fetch_user_data(username):
+                    st.rerun()
+                return
+        
+        # User not cached - require admin access
+        st.warning(f"⏳ Leaderboard data for '{username}' has not been processed yet.")
+        st.info("📧 To request processing for this user, please contact **@stevilkinevil** with the username.")
+        st.markdown("---")
+        
+        # Admin processing section
+        with st.expander("🔒 Admin Processing (Password Required)"):
+            admin_password = st.text_input("Admin Password:", type="password", key="admin_password")
+            if st.button("🚀 Start Processing", type="secondary"):
+                if admin_password == "booty":
+                    st.success("✅ Admin access granted. Starting processing...")
+                    if fetch_user_data(username):
+                        st.rerun()
+                else:
+                    st.error("❌ Invalid admin password")
+        return
     elif search_button and not username:
         st.warning("Please enter a username to search.")
     
