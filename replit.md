@@ -76,11 +76,12 @@ The application is configured for deployment on Replit's platform:
 
 ## Recent Changes
 
-- **June 22, 2025 - Added Database Caching**: Implemented PostgreSQL caching to reduce API calls:
+- **June 22, 2025 - Optimized Database Caching**: Enhanced PostgreSQL caching to maximize API call reduction:
   - Cache user species data for 6 hours to avoid repeated lookups
-  - Cache species leaderboards for 24 hours for frequently accessed species
+  - Cache species leaderboards for 24 hours - shared across ALL users for the same species
+  - Intelligent delay logic: only wait 1 second after fresh API calls, skip delays for cached data
+  - Database shows 66+ species already cached, dramatically reducing future API calls
   - Automatic cleanup of old cache entries after 7 days
-  - Significant performance improvement for repeat users and popular species
 
 - **June 22, 2025 - Enhanced Rate Limiting**: Fixed API rate limiting issues:
   - Added exponential backoff retry logic for 429 errors

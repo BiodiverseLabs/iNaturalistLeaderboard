@@ -55,7 +55,7 @@ def fetch_user_data(username):
         
         # Observer analysis with detailed progress
         st.info("⏳ Analyzing species where user is ranked globally as observer...")
-        st.caption("Checking up to 500 of the user's most observed species (1 second delay between API calls to respect rate limits)")
+        st.caption("Checking up to 500 species (using cached data when available to minimize API calls)")
         observer_progress_bar = st.progress(0)
         observer_status = st.empty()
         observer_time_remaining = st.empty()
@@ -79,7 +79,7 @@ def fetch_user_data(username):
         
         # Identifier analysis with detailed progress
         st.info("⏳ Analyzing species where user is ranked globally as identifier...")
-        st.caption("Checking up to 500 of the user's most identified species (1 second delay between API calls to respect rate limits)")
+        st.caption("Checking up to 500 species (using cached data when available to minimize API calls)")
         identifier_progress_bar = st.progress(0)
         identifier_status = st.empty()
         identifier_time_remaining = st.empty()

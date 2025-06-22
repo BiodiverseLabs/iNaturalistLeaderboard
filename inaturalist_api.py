@@ -174,7 +174,7 @@ class iNaturalistAPI:
                 if not taxon_id or user_count == 0:
                     continue
                 
-                # Get the top observers for this species
+                # Get the top observers for this species (uses cache if available)
                 observers = self.get_species_observers_leaderboard(taxon_id)
                 
                 if observers and len(observers) >= 3:
@@ -191,8 +191,13 @@ class iNaturalistAPI:
                             })
                             break
                 
-                # Add longer delay to prevent rate limiting
-                time.sleep(1.0)
+                # Only add delay if we made an actual API call (not cached)
+                if self.db:
+                    cached_data = self.db.get_species_leaderboard(taxon_id, 'observers')
+                    if not cached_data:  # Only delay if we made a fresh API call
+                        time.sleep(1.0)
+                else:
+                    time.sleep(1.0)
             
             # Final progress update
             if progress_callback:
@@ -283,7 +288,7 @@ class iNaturalistAPI:
                 if not taxon_id or user_count == 0:
                     continue
                 
-                # Get the top identifiers for this species
+                # Get the top identifiers for this species (uses cache if available)
                 identifiers = self.get_species_identifiers_leaderboard(taxon_id)
                 
                 if identifiers and len(identifiers) >= 3:
@@ -300,8 +305,13 @@ class iNaturalistAPI:
                             })
                             break
                 
-                # Add longer delay to prevent rate limiting
-                time.sleep(1.0)
+                # Only add delay if we made an actual API call (not cached)
+                if self.db:
+                    cached_data = self.db.get_species_leaderboard(taxon_id, 'identifiers')
+                    if not cached_data:  # Only delay if we made a fresh API call
+                        time.sleep(1.0)
+                else:
+                    time.sleep(1.0)
             
             # Final progress update
             if progress_callback:
