@@ -415,7 +415,7 @@ class iNaturalistAPI:
                 self.db.cache_species_leaderboard(taxon_id, 'observers', results)
             
             # Add delay after API call to respect rate limits
-            time.sleep(2.0)  # Conservative: 30 calls per minute max
+            time.sleep(1.3)  # 50 calls per minute max
             
             return results
             
@@ -455,7 +455,7 @@ class iNaturalistAPI:
                 self.db.cache_species_leaderboard(taxon_id, 'identifiers', results)
             
             # Add delay after API call to respect rate limits
-            time.sleep(2.0)  # Conservative: 30 calls per minute max
+            time.sleep(1.3)  # 50 calls per minute max
             
             return results
             
