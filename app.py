@@ -34,6 +34,8 @@ if 'processing_user' not in st.session_state:
     st.session_state.processing_user = None
 if 'processing_complete' not in st.session_state:
     st.session_state.processing_complete = False
+if 'admin_mode_user' not in st.session_state:
+    st.session_state.admin_mode_user = None
 
 # Initialize API client
 api_client = iNaturalistAPI()
@@ -363,34 +365,8 @@ def main():
         st.info("📧 To request processing for this user, please contact **@stevilkinevil** with the username.")
         st.markdown("---")
         
-        # Admin processing section with simplified debugging
-        st.write(f"DEBUG MAIN: At admin section for user: {username}")
-        st.write(f"DEBUG MAIN: Session state keys: {list(st.session_state.keys())}")
-        
-        with st.expander("🔒 Admin Processing (Password Required)", expanded=True):
-            admin_password = st.text_input("Admin Password:", type="password", key="admin_password")
-            
-            if st.button("🚀 Start Processing", key="process_btn", type="secondary"):
-                st.write("DEBUG: Process button clicked!")
-                st.write(f"DEBUG: Password check: {admin_password == 'booty'}")
-                
-                if admin_password == "booty":
-                    st.write("SUCCESS: Password correct, starting processing...")
-                    
-                    # Just test basic functionality first
-                    try:
-                        st.write("Testing basic user lookup...")
-                        user_info = api_client.get_user_info(username)
-                        if user_info:
-                            st.write(f"SUCCESS: Found user {username}")
-                            st.json(user_info)
-                        else:
-                            st.write(f"ERROR: User {username} not found")
-                    except Exception as e:
-                        st.write(f"ERROR: Exception during user lookup: {e}")
-                        
-                else:
-                    st.write("ERROR: Incorrect password")
+        # Set admin mode for this user
+        st.session_state.admin_mode_user = username
         
         # Add a button to view results if processing completed
         if st.session_state.processing_complete:
@@ -402,6 +378,51 @@ def main():
         return
     elif search_button and not username:
         st.warning("Please enter a username to search.")
+    
+    # Handle admin mode for non-cached users
+    if st.session_state.admin_mode_user and not st.session_state.user_data:
+        username = st.session_state.admin_mode_user
+        st.write(f"DEBUG: In admin mode for user: {username}")
+        
+        # Admin processing section
+        with st.expander("🔒 Admin Processing (Password Required)", expanded=True):
+            admin_password = st.text_input("Admin Password:", type="password", key="admin_password_persistent")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("🚀 Start Processing", key="process_btn_persistent", type="secondary"):
+                    st.write("DEBUG: Process button clicked!")
+                    
+                    if admin_password == "booty":
+                        st.write("SUCCESS: Password correct, starting processing...")
+                        
+                        try:
+                            st.write("Testing basic user lookup...")
+                            user_info = api_client.get_user_info(username)
+                            if user_info:
+                                st.write(f"SUCCESS: Found user {username}")
+                                st.json(user_info)
+                                
+                                # Now do full processing
+                                st.write("Starting full processing...")
+                                if fetch_user_data(username):
+                                    st.success("Processing completed!")
+                                    st.session_state.admin_mode_user = None
+                                    st.rerun()
+                            else:
+                                st.write(f"ERROR: User {username} not found")
+                        except Exception as e:
+                            st.write(f"ERROR: Exception during processing: {e}")
+                            import traceback
+                            st.code(traceback.format_exc())
+                            
+                    else:
+                        st.write("ERROR: Incorrect password")
+            
+            with col2:
+                if st.button("❌ Cancel", key="cancel_admin"):
+                    st.session_state.admin_mode_user = None
+                    st.rerun()
     
     # Display user data if available
     if st.session_state.user_data:
