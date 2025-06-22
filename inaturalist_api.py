@@ -212,17 +212,12 @@ class iNaturalistAPI:
                 if not taxon_id or user_count == 0:
                     # Update progress for skipped species
                     if progress_callback:
-                        remaining_species = total_species - i - 1
-                        estimated_remaining = remaining_species * 2.0  # Conservative estimate
-                        progress_callback(i + 1, total_species, estimated_remaining)
+                        progress_callback(i + 1, total_species, 0)
                     continue
                 
                 # Update progress BEFORE API call to avoid counting during retries
                 if progress_callback:
-                    remaining_species = total_species - i - 1
-                    # Simple conservative estimate: assume 30% cached, 70% API calls
-                    estimated_remaining = (remaining_species * 0.7 * 2.0) + (remaining_species * 0.3 * 0.1)
-                    progress_callback(i + 1, total_species, estimated_remaining)
+                    progress_callback(i + 1, total_species, 0)
                 
                 # Get the top observers for this species (uses cache if available)
                 observers = self.get_species_observers_leaderboard(taxon_id)
@@ -324,17 +319,12 @@ class iNaturalistAPI:
                 if not taxon_id or user_count == 0:
                     # Update progress for skipped species
                     if progress_callback:
-                        remaining_species = total_species - i - 1
-                        estimated_remaining = remaining_species * 2.0  # Conservative estimate
-                        progress_callback(i + 1, total_species, estimated_remaining)
+                        progress_callback(i + 1, total_species, 0)
                     continue
                 
                 # Update progress BEFORE API call to avoid counting during retries
                 if progress_callback:
-                    remaining_species = total_species - i - 1
-                    # Simple conservative estimate: assume 30% cached, 70% API calls
-                    estimated_remaining = (remaining_species * 0.7 * 2.0) + (remaining_species * 0.3 * 0.1)
-                    progress_callback(i + 1, total_species, estimated_remaining)
+                    progress_callback(i + 1, total_species, 0)
                 
                 # Get the top identifiers for this species (uses cache if available)
                 identifiers = self.get_species_identifiers_leaderboard(taxon_id)
