@@ -30,6 +30,14 @@ class iNaturalistAPI:
                 
                 # Handle rate limiting
                 if response.status_code == 429:
+                    # Log detailed rate limit information
+                    headers_info = []
+                    for header, value in response.headers.items():
+                        if 'rate' in header.lower() or 'limit' in header.lower() or 'retry' in header.lower():
+                            headers_info.append(f"{header}: {value}")
+                    
+                    st.error(f"Rate limit hit (429). Headers: {', '.join(headers_info) if headers_info else 'No rate limit headers found'}")
+                    
                     if attempt < retry_count - 1:
                         wait_time = (attempt + 1) * 5  # Exponential backoff: 5s, 10s, 15s
                         st.warning(f"Rate limit hit. Waiting {wait_time} seconds before retry...")
@@ -195,9 +203,9 @@ class iNaturalistAPI:
                 if self.db:
                     cached_data = self.db.get_species_leaderboard(taxon_id, 'observers')
                     if not cached_data:  # Only delay if we made a fresh API call
-                        time.sleep(2.0)  # Increased delay to prevent rate limiting
+                        time.sleep(3.0)  # Conservative delay: max 20 calls/minute
                 else:
-                    time.sleep(2.0)  # Increased delay to prevent rate limiting
+                    time.sleep(3.0)  # Conservative delay: max 20 calls/minute
             
             # Final progress update
             if progress_callback:
@@ -309,9 +317,9 @@ class iNaturalistAPI:
                 if self.db:
                     cached_data = self.db.get_species_leaderboard(taxon_id, 'identifiers')
                     if not cached_data:  # Only delay if we made a fresh API call
-                        time.sleep(2.0)  # Increased delay to prevent rate limiting
+                        time.sleep(3.0)  # Conservative delay: max 20 calls/minute
                 else:
-                    time.sleep(2.0)  # Increased delay to prevent rate limiting
+                    time.sleep(3.0)  # Conservative delay: max 20 calls/minute
             
             # Final progress update
             if progress_callback:
