@@ -76,11 +76,13 @@ The application is configured for deployment on Replit's platform:
 
 ## Recent Changes
 
-- **June 22, 2025 - Added Admin Password Protection**: Implemented access control to prevent API overuse:
-  - Added admin password prompt ("booty") required before searches can proceed
-  - Protects against hitting iNaturalist's estimated 10k daily API limit when published
-  - Authentication persists during session but resets with "Reset" button
-  - Maintains full functionality for authorized users while preventing public API abuse
+- **June 22, 2025 - Added Admin-Controlled Processing for Public Deployment**: Protected against API rate limiting:
+  - Added cache-first user lookup to instantly load previously processed users
+  - Non-cached users show message to contact @stevilkinevil for processing requests
+  - Admin password protection ("booty") required to process new users
+  - Added "Show Users with Leaderboard Data" button to browse cached users
+  - Cached users can be selected and loaded instantly without password
+  - Designed for public deployment while preventing API abuse
 
 - **June 22, 2025 - Standardized API Rate Limiting**: Fixed inconsistent delays causing rate limit issues:
   - Changed pagination API delays from 0.1s to 1.3s for consistent rate limiting
