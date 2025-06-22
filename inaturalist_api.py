@@ -154,7 +154,6 @@ class iNaturalistAPI:
             if self.db:
                 cached_data = self.db.get_user_species_cache(user_id, 'observations')
                 if cached_data:
-                    st.info("Using cached observation data")
                     return cached_data[:limit]
             
             all_species = []
@@ -261,7 +260,6 @@ class iNaturalistAPI:
             if self.db:
                 cached_data = self.db.get_user_species_cache(user_id, 'identifications')
                 if cached_data:
-                    st.info("Using cached identification data")
                     return cached_data[:limit]
             
             all_species = []
