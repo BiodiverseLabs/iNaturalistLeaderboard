@@ -84,6 +84,12 @@ The application is configured for deployment on Replit's platform:
   - Database shows 66+ species already cached, dramatically reducing future API calls
   - Automatic cleanup of old cache entries after 7 days
 
+- **June 22, 2025 - Fixed Button Toggle Issue**: Improved UI interaction for ranking details:
+  - Fixed toggle buttons that were not switching between #1, #2, #3 rankings smoothly
+  - Added proper state management to close other detail panels when opening a new one
+  - Buttons now respond immediately and correctly show the selected ranking details
+  - Enhanced user experience with reliable panel switching
+
 - **June 22, 2025 - Added CSV Export Functionality**: Enhanced data export capabilities:
   - Added CSV download buttons for both observer and identifier rankings
   - Export includes all ranking data: global rank, species names, taxon IDs, counts

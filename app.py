@@ -244,8 +244,14 @@ def main():
                 count_1 = len(st.session_state.observer_rankings[1])
                 st.metric("Species Count", count_1)
                 if count_1 > 0:
-                    if st.button("View #1 Species", key="observer_1_details"):
+                    button_1_clicked = st.button("View #1 Species", key="observer_1_details")
+                    if button_1_clicked:
+                        # Close other details first
+                        st.session_state.show_observer_details[2] = False
+                        st.session_state.show_observer_details[3] = False
+                        # Toggle this one
                         st.session_state.show_observer_details[1] = not st.session_state.show_observer_details[1]
+                        st.rerun()
                 else:
                     st.info("No #1 rankings")
         
@@ -255,8 +261,14 @@ def main():
                 count_2 = len(st.session_state.observer_rankings[2])
                 st.metric("Species Count", count_2)
                 if count_2 > 0:
-                    if st.button("View #2 Species", key="observer_2_details"):
+                    button_2_clicked = st.button("View #2 Species", key="observer_2_details")
+                    if button_2_clicked:
+                        # Close other details first
+                        st.session_state.show_observer_details[1] = False
+                        st.session_state.show_observer_details[3] = False
+                        # Toggle this one
                         st.session_state.show_observer_details[2] = not st.session_state.show_observer_details[2]
+                        st.rerun()
                 else:
                     st.info("No #2 rankings")
         
@@ -266,8 +278,14 @@ def main():
                 count_3 = len(st.session_state.observer_rankings[3])
                 st.metric("Species Count", count_3)
                 if count_3 > 0:
-                    if st.button("View #3 Species", key="observer_3_details"):
+                    button_3_clicked = st.button("View #3 Species", key="observer_3_details")
+                    if button_3_clicked:
+                        # Close other details first
+                        st.session_state.show_observer_details[1] = False
+                        st.session_state.show_observer_details[2] = False
+                        # Toggle this one
                         st.session_state.show_observer_details[3] = not st.session_state.show_observer_details[3]
+                        st.rerun()
                 else:
                     st.info("No #3 rankings")
         
@@ -296,8 +314,14 @@ def main():
                 count_1 = len(st.session_state.identifier_rankings[1])
                 st.metric("Species Count", count_1)
                 if count_1 > 0:
-                    if st.button("View #1 Species", key="identifier_1_details"):
+                    button_1_clicked = st.button("View #1 Species", key="identifier_1_details")
+                    if button_1_clicked:
+                        # Close other details first
+                        st.session_state.show_identifier_details[2] = False
+                        st.session_state.show_identifier_details[3] = False
+                        # Toggle this one
                         st.session_state.show_identifier_details[1] = not st.session_state.show_identifier_details[1]
+                        st.rerun()
                 else:
                     st.info("No #1 rankings")
         
@@ -307,8 +331,14 @@ def main():
                 count_2 = len(st.session_state.identifier_rankings[2])
                 st.metric("Species Count", count_2)
                 if count_2 > 0:
-                    if st.button("View #2 Species", key="identifier_2_details"):
+                    button_2_clicked = st.button("View #2 Species", key="identifier_2_details")
+                    if button_2_clicked:
+                        # Close other details first
+                        st.session_state.show_identifier_details[1] = False
+                        st.session_state.show_identifier_details[3] = False
+                        # Toggle this one
                         st.session_state.show_identifier_details[2] = not st.session_state.show_identifier_details[2]
+                        st.rerun()
                 else:
                     st.info("No #2 rankings")
         
@@ -318,8 +348,14 @@ def main():
                 count_3 = len(st.session_state.identifier_rankings[3])
                 st.metric("Species Count", count_3)
                 if count_3 > 0:
-                    if st.button("View #3 Species", key="identifier_3_details"):
+                    button_3_clicked = st.button("View #3 Species", key="identifier_3_details")
+                    if button_3_clicked:
+                        # Close other details first
+                        st.session_state.show_identifier_details[1] = False
+                        st.session_state.show_identifier_details[2] = False
+                        # Toggle this one
                         st.session_state.show_identifier_details[3] = not st.session_state.show_identifier_details[3]
+                        st.rerun()
                 else:
                     st.info("No #3 rankings")
         
