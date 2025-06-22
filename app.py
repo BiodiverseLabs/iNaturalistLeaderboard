@@ -54,7 +54,8 @@ def fetch_user_data(username):
             total_obs = api_client.get_user_observation_count(user_info['id'])
         
         # Observer analysis with detailed progress
-        st.info("⏳ Analyzing species where user is top observer globally...")
+        st.info("⏳ Analyzing ALL species where user is ranked globally as observer...")
+        st.caption("This will check every species the user has observed to find their global rankings")
         observer_progress_bar = st.progress(0)
         observer_status = st.empty()
         observer_time_remaining = st.empty()
@@ -77,7 +78,8 @@ def fetch_user_data(username):
         observer_time_remaining.empty()
         
         # Identifier analysis with detailed progress
-        st.info("⏳ Analyzing species where user is top identifier globally...")
+        st.info("⏳ Analyzing ALL species where user is ranked globally as identifier...")
+        st.caption("This will check every species the user has identified to find their global rankings")
         identifier_progress_bar = st.progress(0)
         identifier_status = st.empty()
         identifier_time_remaining = st.empty()

@@ -87,6 +87,10 @@ class iNaturalistAPI:
                 
                 # Add small delay to be respectful to the API
                 time.sleep(0.1)
+                
+                # If we hit the limit, break
+                if len(all_species) >= limit:
+                    break
             
             return all_species[:limit]
             
@@ -100,8 +104,8 @@ class iNaturalistAPI:
         Returns a dictionary with rankings: {1: [...], 2: [...], 3: [...]}
         """
         try:
-            # Get user's observed species (limit to top 50 to reduce API calls)
-            user_species = self.get_user_observations_by_species(user_id, 50)
+            # Get ALL user's observed species (no limit to get complete data)
+            user_species = self.get_user_observations_by_species(user_id, 10000)
             
             rankings = {1: [], 2: [], 3: []}
             total_species = len(user_species)
@@ -181,6 +185,10 @@ class iNaturalistAPI:
                 
                 # Add small delay to be respectful to the API
                 time.sleep(0.1)
+                
+                # If we hit the limit, break
+                if len(all_species) >= limit:
+                    break
             
             return all_species[:limit]
             
@@ -194,8 +202,8 @@ class iNaturalistAPI:
         Returns a dictionary with rankings: {1: [...], 2: [...], 3: [...]}
         """
         try:
-            # Get user's identified species (limit to top 50 to reduce API calls)
-            user_species = self.get_user_identifications_by_species(user_id, 50)
+            # Get ALL user's identified species (no limit to get complete data)
+            user_species = self.get_user_identifications_by_species(user_id, 10000)
             
             rankings = {1: [], 2: [], 3: []}
             total_species = len(user_species)

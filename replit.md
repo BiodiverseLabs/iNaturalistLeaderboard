@@ -76,6 +76,11 @@ The application is configured for deployment on Replit's platform:
 
 ## Recent Changes
 
+- **June 22, 2025 - Complete Species Analysis**: Updated to analyze ALL user species instead of just top 50:
+  - Now processes every species a user has observed or identified (up to 10,000)
+  - Provides comprehensive global ranking analysis across entire user portfolio
+  - More accurate representation of user's true global standing
+
 - **June 22, 2025 - Added Top 3 Global Rankings**: Expanded dashboard to show comprehensive ranking data:
   - Added #2 and #3 global ranking panels for both observers and identifiers
   - Medal-style UI with gold, silver, bronze indicators for rankings
