@@ -266,13 +266,7 @@ class iNaturalistAPI:
                             })
                             break
                 
-                # Only add delay if we made an actual API call (not cached)
-                if self.db:
-                    cached_data = self.db.get_species_leaderboard(taxon_id, 'observers')
-                    if not cached_data:  # Only delay if we made a fresh API call
-                        time.sleep(2.0)  # Conservative: 30 calls per minute max
-                else:
-                    time.sleep(2.0)  # Conservative: 30 calls per minute max
+                # No delay here - delays are handled inside the leaderboard functions
             
             # Final progress update
             if progress_callback:
@@ -409,13 +403,7 @@ class iNaturalistAPI:
                             })
                             break
                 
-                # Only add delay if we made an actual API call (not cached)
-                if self.db:
-                    cached_data = self.db.get_species_leaderboard(taxon_id, 'identifiers')
-                    if not cached_data:  # Only delay if we made a fresh API call
-                        time.sleep(2.0)  # Conservative: 30 calls per minute max
-                else:
-                    time.sleep(2.0)  # Conservative: 30 calls per minute max
+                # No delay here - delays are handled inside the leaderboard functions
             
             # Final progress update
             if progress_callback:
@@ -457,6 +445,9 @@ class iNaturalistAPI:
             # Cache the results (only for global leaderboards)
             if self.db and not place_id and results:
                 self.db.cache_species_leaderboard(taxon_id, 'observers', results)
+            
+            # Add delay after API call to respect rate limits
+            time.sleep(2.0)  # Conservative: 30 calls per minute max
             
             return results
             
