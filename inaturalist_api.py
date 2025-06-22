@@ -94,7 +94,13 @@ class iNaturalistAPI:
                 st.error(f"API request failed after {retry_count} attempts: {' | '.join(error_details)}")
                 raise
             except Exception as e:
-                st.error(f"Unexpected error: {str(e)}")
+                error_details = [
+                    f"Endpoint: {endpoint}",
+                    f"Error Type: {type(e).__name__}",
+                    f"Error: {str(e)}",
+                    f"Attempt: {attempt + 1}/{retry_count}"
+                ]
+                st.error(f"Unexpected API error: {' | '.join(error_details)}")
                 raise
     
     def get_user_info(self, username: str) -> Optional[Dict]:
