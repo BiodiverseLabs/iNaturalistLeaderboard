@@ -203,9 +203,9 @@ class iNaturalistAPI:
                 if self.db:
                     cached_data = self.db.get_species_leaderboard(taxon_id, 'observers')
                     if not cached_data:  # Only delay if we made a fresh API call
-                        time.sleep(3.0)  # Conservative delay: max 20 calls/minute
+                        time.sleep(1.0)  # 60 calls per minute max
                 else:
-                    time.sleep(3.0)  # Conservative delay: max 20 calls/minute
+                    time.sleep(1.0)  # 60 calls per minute max
             
             # Final progress update
             if progress_callback:
@@ -317,9 +317,9 @@ class iNaturalistAPI:
                 if self.db:
                     cached_data = self.db.get_species_leaderboard(taxon_id, 'identifiers')
                     if not cached_data:  # Only delay if we made a fresh API call
-                        time.sleep(3.0)  # Conservative delay: max 20 calls/minute
+                        time.sleep(1.0)  # 60 calls per minute max
                 else:
-                    time.sleep(3.0)  # Conservative delay: max 20 calls/minute
+                    time.sleep(1.0)  # 60 calls per minute max
             
             # Final progress update
             if progress_callback:
