@@ -307,6 +307,16 @@ def main():
     st.title("🏆 iNaturalist User Leaderboards Dashboard")
     st.markdown("Discover where users rank globally as observers and identifiers for different species.")
     
+    # DEBUG: Always show session state
+    with st.expander("🐛 DEBUG Session State", expanded=False):
+        st.write("Current session state:")
+        st.json({
+            "admin_mode_user": st.session_state.get('admin_mode_user'),
+            "admin_authenticated": st.session_state.get('admin_authenticated'),
+            "user_data": st.session_state.get('user_data') is not None,
+            "show_cached_users": st.session_state.get('show_cached_users'),
+        })
+    
     # Show cached users button (standalone)
     cached_users = get_cached_users()
     if cached_users:
@@ -377,12 +387,17 @@ def main():
             admin_password = st.text_input("Admin Password:", type="password", key="admin_password_immediate")
             
             if st.button("🚀 Start Processing", key="process_btn_immediate", type="secondary"):
+                st.write(f"DEBUG: Button clicked, password: {'***' if admin_password else 'empty'}")
                 if admin_password == "booty":
+                    st.write("DEBUG: Setting admin_authenticated = True")
                     st.session_state.admin_authenticated = True
+                    st.write(f"DEBUG: Session state updated: {st.session_state.admin_authenticated}")
                     st.success("Admin access granted. Processing will start...")
+                    st.write("DEBUG: About to call st.rerun()")
                     st.rerun()
                 else:
                     st.error("Invalid admin password")
+                    st.write(f"DEBUG: Invalid password entered: '{admin_password}'")
         
         # Add a button to view results if processing completed
         if st.session_state.processing_complete:
