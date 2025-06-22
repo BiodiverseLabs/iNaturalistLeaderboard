@@ -36,6 +36,10 @@ def create_csv_export(rankings_data, ranking_type):
     """Create CSV data for all top 100 rankings export"""
     csv_rows = []
     
+    # Handle different data structures (cached vs fresh data)
+    if not rankings_data:
+        return ""
+    
     # Use comprehensive top 100 data if available, otherwise fall back to top 3
     if 'all_top100' in rankings_data and rankings_data['all_top100']:
         species_list = rankings_data['all_top100']
@@ -43,7 +47,8 @@ def create_csv_export(rankings_data, ranking_type):
         # Fallback to top 3 data for backwards compatibility
         species_list = []
         for rank in [1, 2, 3]:
-            species_list.extend(rankings_data[rank])
+            if rank in rankings_data and rankings_data[rank]:
+                species_list.extend(rankings_data[rank])
     
     # Sort by global rank
     species_list = sorted(species_list, key=lambda x: x.get('global_rank', 999))
@@ -278,10 +283,15 @@ def main():
             if st.session_state.observer_rankings:
                 observer_csv = create_csv_export(st.session_state.observer_rankings, 'observer')
                 if observer_csv.strip():
-                    # Count total rankings for button label
-                    total_count = len(st.session_state.observer_rankings.get('all_top100', []))
+                    # Count total rankings for button label - handle both data structures
+                    total_count = 0
+                    if 'all_top100' in st.session_state.observer_rankings:
+                        total_count = len(st.session_state.observer_rankings.get('all_top100', []))
                     if total_count == 0:
-                        total_count = sum(len(st.session_state.observer_rankings[rank]) for rank in [1, 2, 3])
+                        # Fallback counting for top 3 structure
+                        for rank in [1, 2, 3]:
+                            if rank in st.session_state.observer_rankings:
+                                total_count += len(st.session_state.observer_rankings[rank])
                     
                     st.download_button(
                         label=f"📥 Export Observer CSV ({total_count} species)",
@@ -295,10 +305,15 @@ def main():
             if st.session_state.identifier_rankings:
                 identifier_csv = create_csv_export(st.session_state.identifier_rankings, 'identifier')
                 if identifier_csv.strip():
-                    # Count total rankings for button label
-                    total_count = len(st.session_state.identifier_rankings.get('all_top100', []))
+                    # Count total rankings for button label - handle both data structures
+                    total_count = 0
+                    if 'all_top100' in st.session_state.identifier_rankings:
+                        total_count = len(st.session_state.identifier_rankings.get('all_top100', []))
                     if total_count == 0:
-                        total_count = sum(len(st.session_state.identifier_rankings[rank]) for rank in [1, 2, 3])
+                        # Fallback counting for top 3 structure
+                        for rank in [1, 2, 3]:
+                            if rank in st.session_state.identifier_rankings:
+                                total_count += len(st.session_state.identifier_rankings[rank])
                     
                     st.download_button(
                         label=f"📥 Export Identifier CSV ({total_count} species)",
