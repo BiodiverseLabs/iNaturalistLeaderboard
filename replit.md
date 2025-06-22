@@ -76,6 +76,13 @@ The application is configured for deployment on Replit's platform:
 
 ## Recent Changes
 
+- **June 22, 2025 - Added Complete User Rankings Cache**: Instant loading for returning users:
+  - Added dedicated user rankings cache storing complete analysis results for 30 days
+  - Returning users get instant dashboard load instead of reprocessing thousands of species
+  - Cache includes observer rankings, identifier rankings, and total observations
+  - Cache keyed by username with automatic expiration after 30 days
+  - Significantly improves user experience for repeat visits
+
 - **June 22, 2025 - Optimized Database Caching & API Rate Limits**: Enhanced PostgreSQL caching and API performance:
   - Cache user species data for 30 days to avoid repeated lookups (increased from 7 days)
   - Cache species leaderboards for 30 days - shared across ALL users for the same species

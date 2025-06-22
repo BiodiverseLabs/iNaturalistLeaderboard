@@ -375,6 +375,10 @@ def main():
         if user.get('observations_count'):
             st.caption(f"Profile shows: {user['observations_count']:,}")
         
+        # Show cache status
+        if st.session_state.cached_data:
+            st.info("ℹ️ This data was loaded instantly from cache (valid for 30 days)")
+        
         # Detailed species lists for observers - show only the active one
         active_observer_rank = None
         for rank in [1, 2, 3]:
