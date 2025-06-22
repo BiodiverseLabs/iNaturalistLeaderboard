@@ -486,6 +486,9 @@ class iNaturalistAPI:
             if self.db and not place_id and results:
                 self.db.cache_species_leaderboard(taxon_id, 'identifiers', results)
             
+            # Add delay after API call to respect rate limits
+            time.sleep(2.0)  # Conservative: 30 calls per minute max
+            
             return results
             
         except Exception as e:
