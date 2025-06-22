@@ -89,7 +89,7 @@ class DatabaseManager:
             st.warning(f"Database cache failed: {' | '.join(error_details)}")
             self.session.rollback()
     
-    def get_user_species_cache(self, user_id: int, cache_type: str, max_age_days: int = 7):
+    def get_user_species_cache(self, user_id: int, cache_type: str, max_age_days: int = 30):
         """Get cached user species data if it exists and is recent enough"""
         cutoff_time = datetime.utcnow() - timedelta(days=max_age_days)
         
@@ -131,7 +131,7 @@ class DatabaseManager:
             st.warning(f"User cache failed: {' | '.join(error_details)}")
             self.session.rollback()
     
-    def cleanup_old_cache(self, max_age_days: int = 7):
+    def cleanup_old_cache(self, max_age_days: int = 30):
         """Clean up old cache entries"""
         try:
             cutoff_time = datetime.utcnow() - timedelta(days=max_age_days)

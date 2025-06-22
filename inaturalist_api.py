@@ -152,7 +152,7 @@ class iNaturalistAPI:
         try:
             # Check cache first
             if self.db:
-                cached_data = self.db.get_user_species_cache(user_id, 'observations')
+                cached_data = self.db.get_user_species_cache(user_id, 'observations', 30)
                 if cached_data:
                     return cached_data[:limit]
             
@@ -273,7 +273,7 @@ class iNaturalistAPI:
         try:
             # Check cache first
             if self.db:
-                cached_data = self.db.get_user_species_cache(user_id, 'identifications')
+                cached_data = self.db.get_user_species_cache(user_id, 'identifications', 30)
                 if cached_data:
                     return cached_data[:limit]
             
