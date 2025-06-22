@@ -45,7 +45,9 @@ class iNaturalistAPI:
             except requests.exceptions.HTTPError as e:
                 if response.status_code == 429 and attempt < retry_count - 1:
                     continue
-                st.error(f"API request failed: {str(e)}")
+                st.error(f"API request failed for {endpoint}: {str(e)}")
+                if response.status_code == 429:
+                    st.error(f"Rate limit exceeded for endpoint: {endpoint}")
                 raise
             except requests.exceptions.RequestException as e:
                 if attempt < retry_count - 1:
@@ -189,8 +191,8 @@ class iNaturalistAPI:
                             })
                             break
                 
-                # Add delay to be respectful to API
-                time.sleep(0.15)
+                # Add longer delay to prevent rate limiting
+                time.sleep(1.0)
             
             # Final progress update
             if progress_callback:
@@ -298,8 +300,8 @@ class iNaturalistAPI:
                             })
                             break
                 
-                # Add delay to be respectful to API
-                time.sleep(0.15)
+                # Add longer delay to prevent rate limiting
+                time.sleep(1.0)
             
             # Final progress update
             if progress_callback:
