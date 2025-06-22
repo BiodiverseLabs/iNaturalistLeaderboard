@@ -94,20 +94,20 @@ class iNaturalistAPI:
             st.error(f"Error fetching user observations by species: {str(e)}")
             return []
     
-    def get_top_observer_species(self, user_id: int, progress_callback=None) -> List[Dict]:
+    def get_observer_rankings(self, user_id: int, progress_callback=None) -> Dict[int, List[Dict]]:
         """
-        Get species where the user is the top observer globally.
-        This checks each species the user has observed to see if they're #1 globally.
+        Get species where the user is ranked in top 3 globally as an observer.
+        Returns a dictionary with rankings: {1: [...], 2: [...], 3: [...]}
         """
         try:
             # Get user's observed species (limit to top 50 to reduce API calls)
             user_species = self.get_user_observations_by_species(user_id, 50)
             
-            top_observer_species = []
+            rankings = {1: [], 2: [], 3: []}
             total_species = len(user_species)
             start_time = time.time()
             
-            # For each species, check if this user is the top observer
+            # For each species, check the user's global ranking
             for i, species in enumerate(user_species):
                 current_time = time.time()
                 elapsed_time = current_time - start_time
@@ -132,18 +132,19 @@ class iNaturalistAPI:
                 # Get the top observers for this species
                 observers = self.get_species_observers_leaderboard(taxon_id)
                 
-                if observers and len(observers) > 0:
-                    # Check if our user is the top observer
-                    top_observer = observers[0]
-                    if top_observer.get('user_id') == user_id:
-                        top_observer_species.append({
-                            'scientific_name': taxon.get('name', 'Unknown'),
-                            'common_name': taxon.get('preferred_common_name', 'No common name'),
-                            'observation_count': user_count,
-                            'taxon_id': taxon_id,
-                            'rank': taxon.get('rank', 'unknown'),
-                            'global_rank': 1
-                        })
+                if observers and len(observers) >= 3:
+                    # Check if our user is in top 3
+                    for rank, observer in enumerate(observers[:3], 1):
+                        if observer.get('user_id') == user_id:
+                            rankings[rank].append({
+                                'scientific_name': taxon.get('name', 'Unknown'),
+                                'common_name': taxon.get('preferred_common_name', 'No common name'),
+                                'observation_count': user_count,
+                                'taxon_id': taxon_id,
+                                'rank': taxon.get('rank', 'unknown'),
+                                'global_rank': rank
+                            })
+                            break
                 
                 # Add delay to be respectful to API
                 time.sleep(0.15)
@@ -152,11 +153,11 @@ class iNaturalistAPI:
             if progress_callback:
                 progress_callback(total_species, total_species, 0)
             
-            return top_observer_species
+            return rankings
             
         except Exception as e:
-            st.error(f"Error fetching top observer species: {str(e)}")
-            return []
+            st.error(f"Error fetching observer rankings: {str(e)}")
+            return {1: [], 2: [], 3: []}
     
     def get_user_identifications_by_species(self, user_id: int, limit: int = 200) -> List[Dict]:
         """Get user's identifications grouped by species"""
@@ -187,20 +188,20 @@ class iNaturalistAPI:
             st.error(f"Error fetching user identifications by species: {str(e)}")
             return []
     
-    def get_top_identifier_species(self, user_id: int, progress_callback=None) -> List[Dict]:
+    def get_identifier_rankings(self, user_id: int, progress_callback=None) -> Dict[int, List[Dict]]:
         """
-        Get species where the user is a top identifier globally.
-        This checks each species the user has identified to see if they're #1 globally.
+        Get species where the user is ranked in top 3 globally as an identifier.
+        Returns a dictionary with rankings: {1: [...], 2: [...], 3: [...]}
         """
         try:
             # Get user's identified species (limit to top 50 to reduce API calls)
             user_species = self.get_user_identifications_by_species(user_id, 50)
             
-            top_identifier_species = []
+            rankings = {1: [], 2: [], 3: []}
             total_species = len(user_species)
             start_time = time.time()
             
-            # For each species, check if this user is the top identifier
+            # For each species, check the user's global ranking
             for i, species in enumerate(user_species):
                 current_time = time.time()
                 elapsed_time = current_time - start_time
@@ -225,18 +226,19 @@ class iNaturalistAPI:
                 # Get the top identifiers for this species
                 identifiers = self.get_species_identifiers_leaderboard(taxon_id)
                 
-                if identifiers and len(identifiers) > 0:
-                    # Check if our user is the top identifier
-                    top_identifier = identifiers[0]
-                    if top_identifier.get('user_id') == user_id:
-                        top_identifier_species.append({
-                            'scientific_name': taxon.get('name', 'Unknown'),
-                            'common_name': taxon.get('preferred_common_name', 'No common name'),
-                            'identification_count': user_count,
-                            'taxon_id': taxon_id,
-                            'rank': taxon.get('rank', 'unknown'),
-                            'global_rank': 1
-                        })
+                if identifiers and len(identifiers) >= 3:
+                    # Check if our user is in top 3
+                    for rank, identifier in enumerate(identifiers[:3], 1):
+                        if identifier.get('user_id') == user_id:
+                            rankings[rank].append({
+                                'scientific_name': taxon.get('name', 'Unknown'),
+                                'common_name': taxon.get('preferred_common_name', 'No common name'),
+                                'identification_count': user_count,
+                                'taxon_id': taxon_id,
+                                'rank': taxon.get('rank', 'unknown'),
+                                'global_rank': rank
+                            })
+                            break
                 
                 # Add delay to be respectful to API
                 time.sleep(0.15)
@@ -245,11 +247,11 @@ class iNaturalistAPI:
             if progress_callback:
                 progress_callback(total_species, total_species, 0)
             
-            return top_identifier_species
+            return rankings
             
         except Exception as e:
-            st.error(f"Error fetching top identifier species: {str(e)}")
-            return []
+            st.error(f"Error fetching identifier rankings: {str(e)}")
+            return {1: [], 2: [], 3: []}
     
     def get_species_observers_leaderboard(self, taxon_id: int, place_id: Optional[int] = None) -> List[Dict]:
         """Get leaderboard of observers for a specific species"""

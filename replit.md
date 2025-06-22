@@ -76,6 +76,12 @@ The application is configured for deployment on Replit's platform:
 
 ## Recent Changes
 
+- **June 22, 2025 - Added Top 3 Global Rankings**: Expanded dashboard to show comprehensive ranking data:
+  - Added #2 and #3 global ranking panels for both observers and identifiers
+  - Medal-style UI with gold, silver, bronze indicators for rankings
+  - Separate expandable lists for each ranking position
+  - Enhanced progress tracking to show breakdown of all ranking discoveries
+
 - **June 22, 2025 - Enhanced Progress Tracking**: Added comprehensive progress bars with real-time tracking showing:
   - Total species to process vs. completed
   - Estimated time remaining based on processing speed
