@@ -84,11 +84,12 @@ The application is configured for deployment on Replit's platform:
   - Database shows 66+ species already cached, dramatically reducing future API calls
   - Automatic cleanup of old cache entries after 7 days
 
-- **June 22, 2025 - Fixed Duplicate Species Processing**: Eliminated duplicate species appearing across ranking positions:
-  - Added deduplication logic to prevent same taxon ID being processed multiple times
-  - Users now only appear in their highest rank position for each species
-  - Fixed root cause: user species data can contain duplicate taxon IDs from API
-  - Added processed_taxons tracking to skip already-processed species
+- **June 22, 2025 - Completely Rewrote Ranking Logic**: Fixed all duplicate species issues:
+  - Completely rewrote observer and identifier ranking functions with clean logic
+  - Added strict deduplication using processed_taxon_ids set
+  - Enhanced session state management to prevent data reference issues
+  - Ensured each species appears only once in their correct ranking position
+  - Fixed issue where Mycena leaiana appeared in both #1 and #2 lists
 
 - **June 22, 2025 - Optimized Progress Performance**: Fixed major performance bottleneck:
   - Removed expensive database sampling (10 queries per species) from progress estimation

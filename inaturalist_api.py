@@ -317,61 +317,61 @@ class iNaturalistAPI:
         Returns a dictionary with rankings: {1: [...], 2: [...], 3: [...]}
         """
         try:
-            # Get user's identified species (reasonable limit to avoid rate limiting)
+            # Get user's identified species
             user_species = self.get_user_identifications_by_species(user_id, 500)
             
+            # Initialize completely fresh rankings
             rankings = {1: [], 2: [], 3: []}
             total_species = len(user_species)
-            processed_taxons = set()  # Track processed taxons to avoid duplicates
+            processed_taxon_ids = set()
             
-            # For each species, check the user's global ranking
             for i, species in enumerate(user_species):
                 taxon = species.get('taxon', {})
                 taxon_id = taxon.get('id')
                 user_count = species.get('count', 0)
                 
+                # Skip invalid species
                 if not taxon_id or user_count == 0:
-                    # Update progress for skipped species
                     if progress_callback:
                         progress_callback(i + 1, total_species, 0)
                     continue
                 
-                # Skip if we've already processed this taxon (avoid duplicates)
-                if taxon_id in processed_taxons:
-                    if progress_callback:
-                        progress_callback(i + 1, total_species, 0)
-                if taxon_id in processed_taxons:
+                # Skip already processed taxons to prevent duplicates
+                if taxon_id in processed_taxon_ids:
                     if progress_callback:
                         progress_callback(i + 1, total_species, 0)
                     continue
-                processed_taxons.add(taxon_id)
                 
-                # Update progress BEFORE API call to avoid counting during retries
+                processed_taxon_ids.add(taxon_id)
+                
+                # Update progress
                 if progress_callback:
                     progress_callback(i + 1, total_species, 0)
                 
-                # Get the top identifiers for this species (uses cache if available)
+                # Get global leaderboard for this species
                 identifiers = self.get_species_identifiers_leaderboard(taxon_id)
                 
-                if identifiers and len(identifiers) >= 3:
-                    # Check if our user is in top 3 - only take the FIRST (highest) rank found
-                    user_found_rank = None
-                    for rank, identifier in enumerate(identifiers[:3], 1):
-                        if identifier.get('user_id') == user_id:
-                            user_found_rank = rank
-                            break  # Take the first (highest) rank only
-                    
-                    if user_found_rank:
-                        rankings[user_found_rank].append({
-                            'scientific_name': taxon.get('name', 'Unknown'),
-                            'common_name': taxon.get('preferred_common_name', 'No common name'),
-                            'identification_count': user_count,
-                            'taxon_id': taxon_id,
-                            'rank': taxon.get('rank', 'unknown'),
-                            'global_rank': user_found_rank
-                        })
+                if not identifiers or len(identifiers) < 3:
+                    continue
                 
-                # No delay here - delays are handled inside the leaderboard functions
+                # Find user's exact rank (1, 2, or 3 only)
+                user_global_rank = None
+                for rank_position, identifier in enumerate(identifiers[:3], 1):
+                    if identifier.get('user_id') == user_id:
+                        user_global_rank = rank_position
+                        break
+                
+                # Add to appropriate ranking list
+                if user_global_rank:
+                    species_data = {
+                        'scientific_name': taxon.get('name', 'Unknown'),
+                        'common_name': taxon.get('preferred_common_name', 'No common name'),
+                        'identification_count': user_count,
+                        'taxon_id': taxon_id,
+                        'rank': taxon.get('rank', 'unknown'),
+                        'global_rank': user_global_rank
+                    }
+                    rankings[user_global_rank].append(species_data)
             
             # Final progress update
             if progress_callback:
@@ -388,7 +388,7 @@ class iNaturalistAPI:
             ]
             st.error(f"Identifier rankings failed: {' | '.join(error_details)}")
             return {1: [], 2: [], 3: []}
-    
+
     def get_species_observers_leaderboard(self, taxon_id: int, place_id: Optional[int] = None) -> List[Dict]:
         """Get leaderboard of observers for a specific species"""
         try:

@@ -30,6 +30,16 @@ api_client = iNaturalistAPI()
 
 def reset_session_state():
     """Reset all session state variables"""
+    # Clear all session state
+    keys_to_clear = [
+        'user_data', 'observer_rankings', 'identifier_rankings', 
+        'total_observations', 'show_observer_details', 'show_identifier_details'
+    ]
+    for key in keys_to_clear:
+        if key in st.session_state:
+            del st.session_state[key]
+    
+    # Initialize fresh state
     st.session_state.user_data = None
     st.session_state.observer_rankings = {1: [], 2: [], 3: []}
     st.session_state.identifier_rankings = {1: [], 2: [], 3: []}
@@ -37,7 +47,7 @@ def reset_session_state():
     st.session_state.show_observer_details = {1: False, 2: False, 3: False}
     st.session_state.show_identifier_details = {1: False, 2: False, 3: False}
     
-    # Force clear any cached data to ensure fresh results
+    # Force clear any cached data
     st.cache_data.clear()
 
 def fetch_user_data(username):
