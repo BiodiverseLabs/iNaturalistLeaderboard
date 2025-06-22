@@ -116,9 +116,15 @@ def reset_session_state():
 def fetch_user_data(username):
     """Fetch comprehensive user data from iNaturalist API"""
     try:
+        st.write(f"🔍 Starting data fetch for user: {username}")
+        st.write(f"DEBUG: api_client exists: {api_client is not None}")
+        st.write(f"DEBUG: api_client.db exists: {hasattr(api_client, 'db') and api_client.db is not None}")
+        
         # Check if we have cached complete rankings for this user first
         if hasattr(api_client, 'db') and api_client.db:
+            st.write(f"DEBUG: Checking cache for user: {username}")
             cached_rankings = api_client.db.get_user_rankings_cache(username)
+            st.write(f"DEBUG: Cache result: {cached_rankings is not None}")
             if cached_rankings:
                 st.success(f"✅ Found cached data for {username} from {cached_rankings['cached_at'].strftime('%Y-%m-%d %H:%M:%S')} - loading instantly!")
                 
@@ -151,10 +157,14 @@ def fetch_user_data(username):
                 return True
         
         # Get user basic info
+        st.write(f"DEBUG: No cached data found, fetching fresh data for {username}")
         with st.spinner(f"Looking up user: {username}..."):
+            st.write(f"DEBUG: Calling api_client.get_user_info('{username}')")
             user_info = api_client.get_user_info(username)
+            st.write(f"DEBUG: User info result: {user_info is not None}")
             if not user_info:
                 st.error(f"User '{username}' not found. Please check the username and try again.")
+                st.write(f"DEBUG: get_user_info returned None/False for {username}")
                 return False
         
         st.success(f"Found user: {user_info.get('name', username)}")
@@ -230,10 +240,14 @@ def fetch_user_data(username):
         observer_progress_bar.empty()
         identifier_progress_bar.empty()
         
+        st.write(f"DEBUG: fetch_user_data completed successfully for {username}")
         return True
         
     except Exception as e:
         st.error(f"Error fetching user data: {str(e)}")
+        st.write(f"DEBUG: Exception in fetch_user_data: {type(e).__name__}: {e}")
+        import traceback
+        st.code(traceback.format_exc())
         return False
 
 def display_species_panel(title, species_list, detail_key, icon):
@@ -348,26 +362,41 @@ def main():
             process_button = st.button("🚀 Start Processing", type="secondary", key="admin_process")
             
             if process_button:
+                st.write(f"DEBUG: Button clicked, password entered: {'***' if admin_password else 'None'}")
+                
                 if admin_password == "booty":
                     st.success("✅ Admin access granted. Starting processing...")
                     st.info("🔄 Processing user data - this may take several minutes...")
+                    st.write(f"DEBUG: About to call fetch_user_data('{username}')")
                     
                     # Create a placeholder for processing status
                     status_placeholder = st.empty()
                     
                     # Process the user data
-                    with status_placeholder.container():
-                        st.write("Processing in progress...")
-                        success = fetch_user_data(username)
+                    try:
+                        with status_placeholder.container():
+                            st.write("Processing in progress...")
+                            st.write(f"DEBUG: Calling fetch_user_data with username: {username}")
+                            success = fetch_user_data(username)
+                            st.write(f"DEBUG: fetch_user_data returned: {success}")
+                            
+                        if success:
+                            st.success(f"✅ Processing completed successfully for {username}!")
+                            st.write("DEBUG: About to call st.rerun()")
+                            st.balloons()
+                            st.rerun()
+                        else:
+                            st.error("❌ Processing failed - please check the logs")
+                            st.write("DEBUG: fetch_user_data returned False")
+                    except Exception as e:
+                        st.error(f"❌ Exception during processing: {str(e)}")
+                        st.write(f"DEBUG: Exception details: {type(e).__name__}: {e}")
+                        import traceback
+                        st.code(traceback.format_exc())
                         
-                    if success:
-                        st.success(f"✅ Processing completed successfully for {username}!")
-                        st.balloons()
-                        st.rerun()
-                    else:
-                        st.error("❌ Processing failed - please check the logs")
                 elif admin_password:  # Only show error if password was entered
                     st.error("❌ Invalid admin password")
+                    st.write(f"DEBUG: Invalid password entered: '{admin_password}'")
         return
     elif search_button and not username:
         st.warning("Please enter a username to search.")
