@@ -368,6 +368,18 @@ def main():
         # Set admin mode for this user
         st.session_state.admin_mode_user = username
         
+        # Show admin interface immediately
+        with st.expander("🔒 Admin Processing (Password Required)", expanded=True):
+            st.write(f"Ready to process user: {username}")
+            admin_password = st.text_input("Admin Password:", type="password", key="admin_password_immediate")
+            
+            if st.button("🚀 Start Processing", key="process_btn_immediate", type="secondary"):
+                if admin_password == "booty":
+                    st.success("Admin access granted. Processing will continue...")
+                    st.rerun()  # This will trigger the persistent admin mode
+                else:
+                    st.error("Invalid admin password")
+        
         # Add a button to view results if processing completed
         if st.session_state.processing_complete:
             if st.button("📊 View Results", type="primary"):
@@ -380,7 +392,7 @@ def main():
         st.warning("Please enter a username to search.")
     
     # Handle admin mode for non-cached users
-    if st.session_state.admin_mode_user and not st.session_state.user_data:
+    if st.session_state.admin_mode_user:
         username = st.session_state.admin_mode_user
         st.write(f"DEBUG: In admin mode for user: {username}")
         
