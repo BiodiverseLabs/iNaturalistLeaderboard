@@ -31,7 +31,7 @@ class iNaturalistAPI:
                 # Handle rate limiting
                 if response.status_code == 429:
                     if attempt < retry_count - 1:
-                        wait_time = (attempt + 1) * 2  # Exponential backoff: 2s, 4s, 6s
+                        wait_time = (attempt + 1) * 5  # Exponential backoff: 5s, 10s, 15s
                         st.warning(f"Rate limit hit. Waiting {wait_time} seconds before retry...")
                         time.sleep(wait_time)
                         continue
@@ -195,9 +195,9 @@ class iNaturalistAPI:
                 if self.db:
                     cached_data = self.db.get_species_leaderboard(taxon_id, 'observers')
                     if not cached_data:  # Only delay if we made a fresh API call
-                        time.sleep(1.0)
+                        time.sleep(2.0)  # Increased delay to prevent rate limiting
                 else:
-                    time.sleep(1.0)
+                    time.sleep(2.0)  # Increased delay to prevent rate limiting
             
             # Final progress update
             if progress_callback:
@@ -309,9 +309,9 @@ class iNaturalistAPI:
                 if self.db:
                     cached_data = self.db.get_species_leaderboard(taxon_id, 'identifiers')
                     if not cached_data:  # Only delay if we made a fresh API call
-                        time.sleep(1.0)
+                        time.sleep(2.0)  # Increased delay to prevent rate limiting
                 else:
-                    time.sleep(1.0)
+                    time.sleep(2.0)  # Increased delay to prevent rate limiting
             
             # Final progress update
             if progress_callback:

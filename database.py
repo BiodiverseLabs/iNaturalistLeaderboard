@@ -47,9 +47,9 @@ class DatabaseManager:
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
     
-    def get_species_leaderboard(self, taxon_id: int, leaderboard_type: str, max_age_hours: int = 24):
+    def get_species_leaderboard(self, taxon_id: int, leaderboard_type: str, max_age_days: int = 30):
         """Get cached leaderboard data if it exists and is recent enough"""
-        cutoff_time = datetime.utcnow() - timedelta(hours=max_age_hours)
+        cutoff_time = datetime.utcnow() - timedelta(days=max_age_days)
         
         result = self.session.query(SpeciesLeaderboard).filter(
             SpeciesLeaderboard.taxon_id == taxon_id,
@@ -82,9 +82,9 @@ class DatabaseManager:
             st.warning(f"Failed to cache leaderboard data: {str(e)}")
             self.session.rollback()
     
-    def get_user_species_cache(self, user_id: int, cache_type: str, max_age_hours: int = 6):
+    def get_user_species_cache(self, user_id: int, cache_type: str, max_age_days: int = 7):
         """Get cached user species data if it exists and is recent enough"""
-        cutoff_time = datetime.utcnow() - timedelta(hours=max_age_hours)
+        cutoff_time = datetime.utcnow() - timedelta(days=max_age_days)
         
         result = self.session.query(UserSpeciesCache).filter(
             UserSpeciesCache.user_id == user_id,
