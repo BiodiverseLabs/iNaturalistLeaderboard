@@ -76,6 +76,12 @@ The application is configured for deployment on Replit's platform:
 
 ## Recent Changes
 
+- **June 22, 2025 - Standardized API Rate Limiting**: Fixed inconsistent delays causing rate limit issues:
+  - Changed pagination API delays from 0.1s to 1.3s for consistent rate limiting
+  - All API calls now use uniform 1.3-second delays (50 calls per minute)
+  - Eliminates burst API usage during user species data collection
+  - Reduces likelihood of hitting iNaturalist's 429 rate limits
+
 - **June 22, 2025 - Enhanced CSV Export with Top 100 Rankings**: Comprehensive ranking data export:
   - Modified CSV export to include ALL species where user ranks in top 100 globally
   - CSV now shows exact ranking position (1-100) for each species, not just top 3
