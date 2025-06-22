@@ -223,14 +223,38 @@ def main():
     if st.session_state.user_data:
         user = st.session_state.user_data
         
-        # User info header
+        # User info header with export buttons
         st.write("---")
-        col1, col2, col3 = st.columns([1, 2, 1])
+        header_col1, header_col2, header_col3, header_col4 = st.columns([1, 2, 1, 1])
         
-        with col2:
+        with header_col2:
             st.subheader(f"👤 {user.get('name', user.get('login', 'Unknown User'))}")
             if user.get('login'):
                 st.caption(f"@{user['login']}")
+        
+        with header_col3:
+            if st.session_state.observer_rankings:
+                observer_csv = create_csv_export(st.session_state.observer_rankings, 'observer')
+                if observer_csv.strip():
+                    st.download_button(
+                        label="📥 Export Observer CSV",
+                        data=observer_csv,
+                        file_name=f"{st.session_state.user_data['login']}_observer_rankings.csv",
+                        mime="text/csv",
+                        key="header_observer_csv_download"
+                    )
+        
+        with header_col4:
+            if st.session_state.identifier_rankings:
+                identifier_csv = create_csv_export(st.session_state.identifier_rankings, 'identifier')
+                if identifier_csv.strip():
+                    st.download_button(
+                        label="📥 Export Identifier CSV",
+                        data=identifier_csv,
+                        file_name=f"{st.session_state.user_data['login']}_identifier_rankings.csv",
+                        mime="text/csv",
+                        key="header_identifier_csv_download"
+                    )
         
         st.write("---")
         
@@ -290,21 +314,7 @@ def main():
                     st.info("No #3 rankings")
         
         # Identifier Rankings Section
-        id_header_col1, id_header_col2 = st.columns([3, 1])
-        with id_header_col1:
-            st.markdown("## 🏷️ Identifier Global Rankings")
-        with id_header_col2:
-            if st.session_state.identifier_rankings:
-                # Create CSV export for identifier rankings
-                identifier_csv = create_csv_export(st.session_state.identifier_rankings, 'identifier')
-                if identifier_csv.strip():  # Only show button if there's data
-                    st.download_button(
-                        label="📥 Export CSV",
-                        data=identifier_csv,
-                        file_name=f"{st.session_state.user_data['login']}_identifier_rankings.csv",
-                        mime="text/csv",
-                        key="identifier_csv_download"
-                    )
+        st.markdown("## 🏷️ Identifier Global Rankings")
         
         id_col1, id_col2, id_col3 = st.columns(3)
         

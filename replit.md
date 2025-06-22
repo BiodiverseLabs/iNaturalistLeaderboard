@@ -84,6 +84,12 @@ The application is configured for deployment on Replit's platform:
   - Database shows 66+ species already cached, dramatically reducing future API calls
   - Automatic cleanup of old cache entries after 7 days
 
+- **June 22, 2025 - Improved CSV Export Layout**: Enhanced user interface for data export:
+  - Moved CSV export buttons to the user header area for better visibility and accessibility
+  - Export buttons now appear next to the username instead of in the section headers
+  - Cleaner layout with dedicated export area in the main user information section
+  - More intuitive placement for users looking to export their complete ranking data
+
 - **June 22, 2025 - Fixed Button Toggle Issue**: Improved UI interaction for ranking details:
   - Fixed toggle buttons that were not switching between #1, #2, #3 rankings smoothly
   - Added proper state management to close other detail panels when opening a new one
