@@ -98,6 +98,24 @@ def reset_session_state():
 def fetch_user_data(username):
     """Fetch comprehensive user data from iNaturalist API"""
     try:
+        # Check if we have cached complete rankings for this user first
+        if hasattr(api_client, 'db') and api_client.db:
+            cached_rankings = api_client.db.get_user_rankings_cache(username)
+            if cached_rankings:
+                st.success(f"✅ Found cached data for {username} from {cached_rankings['cached_at'].strftime('%Y-%m-%d %H:%M:%S')} - loading instantly!")
+                
+                # Load from cache
+                st.session_state.user_data = {
+                    'id': cached_rankings['user_id'],
+                    'login': cached_rankings['username'],
+                    'name': cached_rankings['username']
+                }
+                st.session_state.observer_rankings = cached_rankings['observer_rankings']
+                st.session_state.identifier_rankings = cached_rankings['identifier_rankings'] 
+                st.session_state.total_observations = cached_rankings['total_observations']
+                st.session_state.cached_data = True
+                return True
+        
         # Get user basic info
         with st.spinner(f"Looking up user: {username}..."):
             user_info = api_client.get_user_info(username)
@@ -158,9 +176,20 @@ def fetch_user_data(username):
             2: list(identifier_rankings[2]),
             3: list(identifier_rankings[3])
         }
+        st.session_state.cached_data = False
         
-        # Clean up old cache entries periodically
+        # Save the complete results to cache for future use
         if hasattr(api_client, 'db') and api_client.db:
+            api_client.db.cache_user_rankings(
+                user_info['id'], 
+                username, 
+                observer_rankings, 
+                identifier_rankings, 
+                total_obs
+            )
+            st.info("💾 Results saved to cache for instant loading next time!")
+            
+            # Clean up old cache entries periodically
             api_client.db.cleanup_old_cache()
         
         # Clear progress elements
