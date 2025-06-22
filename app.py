@@ -343,14 +343,30 @@ def main():
         st.markdown("---")
         
         # Admin processing section
-        with st.expander("🔒 Admin Processing (Password Required)"):
+        with st.expander("🔒 Admin Processing (Password Required)", expanded=True):
             admin_password = st.text_input("Admin Password:", type="password", key="admin_password")
-            if st.button("🚀 Start Processing", type="secondary"):
+            process_button = st.button("🚀 Start Processing", type="secondary", key="admin_process")
+            
+            if process_button:
                 if admin_password == "booty":
                     st.success("✅ Admin access granted. Starting processing...")
-                    if fetch_user_data(username):
+                    st.info("🔄 Processing user data - this may take several minutes...")
+                    
+                    # Create a placeholder for processing status
+                    status_placeholder = st.empty()
+                    
+                    # Process the user data
+                    with status_placeholder.container():
+                        st.write("Processing in progress...")
+                        success = fetch_user_data(username)
+                        
+                    if success:
+                        st.success(f"✅ Processing completed successfully for {username}!")
+                        st.balloons()
                         st.rerun()
-                else:
+                    else:
+                        st.error("❌ Processing failed - please check the logs")
+                elif admin_password:  # Only show error if password was entered
                     st.error("❌ Invalid admin password")
         return
     elif search_button and not username:
