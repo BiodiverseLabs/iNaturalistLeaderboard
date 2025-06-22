@@ -76,6 +76,13 @@ The application is configured for deployment on Replit's platform:
 
 ## Recent Changes
 
+- **June 22, 2025 - Enhanced CSV Export with Top 100 Rankings**: Comprehensive ranking data export:
+  - Modified CSV export to include ALL species where user ranks in top 100 globally
+  - CSV now shows exact ranking position (1-100) for each species, not just top 3
+  - Updated ranking analysis to capture comprehensive leaderboard data during processing
+  - CSV files renamed to indicate top 100 scope and show species count in button labels
+  - Provides complete picture of user's global standing across all species
+
 - **June 22, 2025 - Added Complete User Rankings Cache**: Instant loading for returning users:
   - Added dedicated user rankings cache storing complete analysis results for 30 days
   - Returning users get instant dashboard load instead of reprocessing thousands of species

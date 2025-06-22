@@ -33,25 +33,36 @@ if 'cached_data' not in st.session_state:
 api_client = iNaturalistAPI()
 
 def create_csv_export(rankings_data, ranking_type):
-    """Create CSV data for rankings export"""
+    """Create CSV data for all top 100 rankings export"""
     csv_rows = []
     
-    for rank in [1, 2, 3]:
-        for species in rankings_data[rank]:
-            row = {
-                'global_rank': rank,
-                'scientific_name': species.get('scientific_name', ''),
-                'common_name': species.get('common_name', ''),
-                'taxon_id': species.get('taxon_id', ''),
-                'taxonomic_rank': species.get('rank', ''),
-            }
-            
-            if ranking_type == 'observer':
-                row['observation_count'] = species.get('observation_count', 0)
-            else:
-                row['identification_count'] = species.get('identification_count', 0)
-            
-            csv_rows.append(row)
+    # Use comprehensive top 100 data if available, otherwise fall back to top 3
+    if 'all_top100' in rankings_data and rankings_data['all_top100']:
+        species_list = rankings_data['all_top100']
+    else:
+        # Fallback to top 3 data for backwards compatibility
+        species_list = []
+        for rank in [1, 2, 3]:
+            species_list.extend(rankings_data[rank])
+    
+    # Sort by global rank
+    species_list = sorted(species_list, key=lambda x: x.get('global_rank', 999))
+    
+    for species in species_list:
+        row = {
+            'global_rank': species.get('global_rank', ''),
+            'scientific_name': species.get('scientific_name', ''),
+            'common_name': species.get('common_name', ''),
+            'taxon_id': species.get('taxon_id', ''),
+            'taxonomic_rank': species.get('rank', ''),
+        }
+        
+        if ranking_type == 'observer':
+            row['observation_count'] = species.get('observation_count', 0)
+        else:
+            row['identification_count'] = species.get('identification_count', 0)
+        
+        csv_rows.append(row)
     
     # Create CSV string
     output = io.StringIO()
@@ -238,10 +249,15 @@ def main():
             if st.session_state.observer_rankings:
                 observer_csv = create_csv_export(st.session_state.observer_rankings, 'observer')
                 if observer_csv.strip():
+                    # Count total rankings for button label
+                    total_count = len(st.session_state.observer_rankings.get('all_top100', []))
+                    if total_count == 0:
+                        total_count = sum(len(st.session_state.observer_rankings[rank]) for rank in [1, 2, 3])
+                    
                     st.download_button(
-                        label="📥 Export Observer CSV",
+                        label=f"📥 Export Observer CSV ({total_count} species)",
                         data=observer_csv,
-                        file_name=f"{st.session_state.user_data['login']}_observer_rankings.csv",
+                        file_name=f"{st.session_state.user_data['login']}_observer_top100_rankings.csv",
                         mime="text/csv",
                         key="header_observer_csv_download"
                     )
@@ -250,10 +266,15 @@ def main():
             if st.session_state.identifier_rankings:
                 identifier_csv = create_csv_export(st.session_state.identifier_rankings, 'identifier')
                 if identifier_csv.strip():
+                    # Count total rankings for button label
+                    total_count = len(st.session_state.identifier_rankings.get('all_top100', []))
+                    if total_count == 0:
+                        total_count = sum(len(st.session_state.identifier_rankings[rank]) for rank in [1, 2, 3])
+                    
                     st.download_button(
-                        label="📥 Export Identifier CSV",
+                        label=f"📥 Export Identifier CSV ({total_count} species)",
                         data=identifier_csv,
-                        file_name=f"{st.session_state.user_data['login']}_identifier_rankings.csv",
+                        file_name=f"{st.session_state.user_data['login']}_identifier_top100_rankings.csv",
                         mime="text/csv",
                         key="header_identifier_csv_download"
                     )

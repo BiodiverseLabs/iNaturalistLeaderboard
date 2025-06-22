@@ -199,8 +199,9 @@ class iNaturalistAPI:
             # Get user's observed species (all records)
             user_species = self.get_user_observations_by_species(user_id, 10000)
             
-            # Initialize completely fresh rankings
+            # Initialize completely fresh rankings and comprehensive data
             rankings = {1: [], 2: [], 3: []}
+            all_rankings = []  # Store all top 100 rankings for CSV export
             total_species = len(user_species)
             processed_taxon_ids = set()
             
@@ -230,18 +231,18 @@ class iNaturalistAPI:
                 # Get global leaderboard for this species
                 observers = self.get_species_observers_leaderboard(taxon_id)
                 
-                if not observers or len(observers) < 3:
+                if not observers:
                     continue
                 
-                # Find user's exact rank (1, 2, or 3 only)
+                # Find user's exact rank in top 100
                 user_global_rank = None
-                for rank_position, observer in enumerate(observers[:3], 1):
+                for rank_position, observer in enumerate(observers, 1):
                     if observer.get('user_id') == user_id:
                         user_global_rank = rank_position
                         break
                 
-                # Add to appropriate ranking list
-                if user_global_rank:
+                # If user is in top 100, add to comprehensive data
+                if user_global_rank and user_global_rank <= 100:
                     species_data = {
                         'scientific_name': taxon.get('name', 'Unknown'),
                         'common_name': taxon.get('preferred_common_name', 'No common name'),
@@ -250,7 +251,13 @@ class iNaturalistAPI:
                         'rank': taxon.get('rank', 'unknown'),
                         'global_rank': user_global_rank
                     }
-                    rankings[user_global_rank].append(species_data)
+                    
+                    # Add to comprehensive list for CSV
+                    all_rankings.append(species_data)
+                    
+                    # Add to top 3 rankings for display if applicable
+                    if user_global_rank <= 3:
+                        rankings[user_global_rank].append(species_data)
             
             # Final progress update
             if progress_callback:
@@ -320,8 +327,9 @@ class iNaturalistAPI:
             # Get user's identified species (all records)
             user_species = self.get_user_identifications_by_species(user_id, 10000)
             
-            # Initialize completely fresh rankings
+            # Initialize completely fresh rankings and comprehensive data
             rankings = {1: [], 2: [], 3: []}
+            all_rankings = []  # Store all top 100 rankings for CSV export
             total_species = len(user_species)
             processed_taxon_ids = set()
             
@@ -351,18 +359,18 @@ class iNaturalistAPI:
                 # Get global leaderboard for this species
                 identifiers = self.get_species_identifiers_leaderboard(taxon_id)
                 
-                if not identifiers or len(identifiers) < 3:
+                if not identifiers:
                     continue
                 
-                # Find user's exact rank (1, 2, or 3 only)
+                # Find user's exact rank in top 100
                 user_global_rank = None
-                for rank_position, identifier in enumerate(identifiers[:3], 1):
+                for rank_position, identifier in enumerate(identifiers, 1):
                     if identifier.get('user_id') == user_id:
                         user_global_rank = rank_position
                         break
                 
-                # Add to appropriate ranking list
-                if user_global_rank:
+                # If user is in top 100, add to comprehensive data
+                if user_global_rank and user_global_rank <= 100:
                     species_data = {
                         'scientific_name': taxon.get('name', 'Unknown'),
                         'common_name': taxon.get('preferred_common_name', 'No common name'),
@@ -371,7 +379,13 @@ class iNaturalistAPI:
                         'rank': taxon.get('rank', 'unknown'),
                         'global_rank': user_global_rank
                     }
-                    rankings[user_global_rank].append(species_data)
+                    
+                    # Add to comprehensive list for CSV
+                    all_rankings.append(species_data)
+                    
+                    # Add to top 3 rankings for display if applicable
+                    if user_global_rank <= 3:
+                        rankings[user_global_rank].append(species_data)
             
             # Final progress update
             if progress_callback:
