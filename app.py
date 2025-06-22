@@ -58,48 +58,32 @@ def fetch_user_data(username):
         st.caption("Checking up to 500 species (2-second delays for new API calls, cached data used instantly)")
         observer_progress_bar = st.progress(0)
         observer_status = st.empty()
-        observer_time_remaining = st.empty()
         
         def observer_progress_callback(current, total, time_remaining):
             progress = current / total if total > 0 else 0
             observer_progress_bar.progress(progress)
             observer_status.text(f"Processing species {current} of {total}")
-            if time_remaining > 0:
-                minutes = int(time_remaining // 60)
-                seconds = int(time_remaining % 60)
-                observer_time_remaining.text(f"Estimated time remaining: {minutes}m {seconds}s")
-            else:
-                observer_time_remaining.text("")
         
         # Get observer rankings (1st, 2nd, 3rd place)
         observer_rankings = api_client.get_observer_rankings(user_info['id'], observer_progress_callback)
         total_observer_species = sum(len(species_list) for species_list in observer_rankings.values())
         observer_status.success(f"✅ Found {len(observer_rankings[1])} #1, {len(observer_rankings[2])} #2, {len(observer_rankings[3])} #3 observer rankings")
-        observer_time_remaining.empty()
         
         # Identifier analysis with detailed progress
         st.info("⏳ Analyzing species where user is ranked globally as identifier...")
         st.caption("Checking up to 500 species (2-second delays for new API calls, cached data used instantly)")
         identifier_progress_bar = st.progress(0)
         identifier_status = st.empty()
-        identifier_time_remaining = st.empty()
         
         def identifier_progress_callback(current, total, time_remaining):
             progress = current / total if total > 0 else 0
             identifier_progress_bar.progress(progress)
             identifier_status.text(f"Processing species {current} of {total}")
-            if time_remaining > 0:
-                minutes = int(time_remaining // 60)
-                seconds = int(time_remaining % 60)
-                identifier_time_remaining.text(f"Estimated time remaining: {minutes}m {seconds}s")
-            else:
-                identifier_time_remaining.text("")
         
         # Get identifier rankings (1st, 2nd, 3rd place)
         identifier_rankings = api_client.get_identifier_rankings(user_info['id'], identifier_progress_callback)
         total_identifier_species = sum(len(species_list) for species_list in identifier_rankings.values())
         identifier_status.success(f"✅ Found {len(identifier_rankings[1])} #1, {len(identifier_rankings[2])} #2, {len(identifier_rankings[3])} #3 identifier rankings")
-        identifier_time_remaining.empty()
         
         # Update session state
         st.session_state.user_data = user_info
