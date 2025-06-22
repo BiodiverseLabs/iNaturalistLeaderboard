@@ -28,6 +28,36 @@ if 'show_identifier_details' not in st.session_state:
 # Initialize API client
 api_client = iNaturalistAPI()
 
+def create_csv_export(rankings_data, ranking_type):
+    """Create CSV data for rankings export"""
+    csv_rows = []
+    
+    for rank in [1, 2, 3]:
+        for species in rankings_data[rank]:
+            row = {
+                'global_rank': rank,
+                'scientific_name': species.get('scientific_name', ''),
+                'common_name': species.get('common_name', ''),
+                'taxon_id': species.get('taxon_id', ''),
+                'taxonomic_rank': species.get('rank', ''),
+            }
+            
+            if ranking_type == 'observer':
+                row['observation_count'] = species.get('observation_count', 0)
+            else:
+                row['identification_count'] = species.get('identification_count', 0)
+            
+            csv_rows.append(row)
+    
+    # Create CSV string
+    output = io.StringIO()
+    if csv_rows:
+        writer = csv.DictWriter(output, fieldnames=csv_rows[0].keys())
+        writer.writeheader()
+        writer.writerows(csv_rows)
+    
+    return output.getvalue()
+
 def reset_session_state():
     """Reset all session state variables"""
     # Clear all session state
@@ -240,7 +270,22 @@ def main():
                     st.info("No #3 rankings")
         
         # Identifier Rankings Section
-        st.markdown("## 🏷️ Identifier Global Rankings")
+        id_header_col1, id_header_col2 = st.columns([3, 1])
+        with id_header_col1:
+            st.markdown("## 🏷️ Identifier Global Rankings")
+        with id_header_col2:
+            if st.session_state.identifier_rankings:
+                # Create CSV export for identifier rankings
+                identifier_csv = create_csv_export(st.session_state.identifier_rankings, 'identifier')
+                if identifier_csv.strip():  # Only show button if there's data
+                    st.download_button(
+                        label="📥 Export CSV",
+                        data=identifier_csv,
+                        file_name=f"{st.session_state.user_data['login']}_identifier_rankings.csv",
+                        mime="text/csv",
+                        key="identifier_csv_download"
+                    )
+        
         id_col1, id_col2, id_col3 = st.columns(3)
         
         with id_col1:

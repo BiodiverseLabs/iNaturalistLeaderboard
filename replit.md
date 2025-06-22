@@ -84,6 +84,12 @@ The application is configured for deployment on Replit's platform:
   - Database shows 66+ species already cached, dramatically reducing future API calls
   - Automatic cleanup of old cache entries after 7 days
 
+- **June 22, 2025 - Added CSV Export Functionality**: Enhanced data export capabilities:
+  - Added CSV download buttons for both observer and identifier rankings
+  - Export includes all ranking data: global rank, species names, taxon IDs, counts
+  - Files named with username for easy identification (e.g. "stevilkinevil_observer_rankings.csv")
+  - Clean CSV format suitable for spreadsheet analysis and further data processing
+
 - **June 22, 2025 - Completely Rewrote Ranking Logic**: Fixed all duplicate species issues:
   - Completely rewrote observer and identifier ranking functions with clean logic
   - Added strict deduplication using processed_taxon_ids set
