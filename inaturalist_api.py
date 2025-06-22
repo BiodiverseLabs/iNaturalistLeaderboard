@@ -2,6 +2,7 @@ import requests
 import time
 from typing import Dict, List, Optional
 import streamlit as st
+from database import DatabaseManager
 
 class iNaturalistAPI:
     """Client for interacting with the iNaturalist API v1"""
@@ -13,6 +14,11 @@ class iNaturalistAPI:
             'User-Agent': 'iNaturalist-Dashboard/1.0',
             'Accept': 'application/json'
         })
+        try:
+            self.db = DatabaseManager()
+        except Exception as e:
+            st.warning(f"Database connection failed: {str(e)}. Running without cache.")
+            self.db = None
     
     def _make_request(self, endpoint: str, params: Dict = None, retry_count: int = 3) -> Dict:
         """Make a request to the iNaturalist API with error handling and retry logic"""
@@ -90,6 +96,13 @@ class iNaturalistAPI:
     def get_user_observations_by_species(self, user_id: int, limit: int = 200) -> List[Dict]:
         """Get user's observations grouped by species"""
         try:
+            # Check cache first
+            if self.db:
+                cached_data = self.db.get_user_species_cache(user_id, 'observations')
+                if cached_data:
+                    st.info("Using cached observation data")
+                    return cached_data[:limit]
+            
             all_species = []
             page = 1
             
@@ -113,6 +126,10 @@ class iNaturalistAPI:
                 # If we hit the limit, break
                 if len(all_species) >= limit:
                     break
+            
+            # Cache the results
+            if self.db and all_species:
+                self.db.cache_user_species(user_id, 'observations', all_species)
             
             return all_species[:limit]
             
@@ -188,6 +205,13 @@ class iNaturalistAPI:
     def get_user_identifications_by_species(self, user_id: int, limit: int = 200) -> List[Dict]:
         """Get user's identifications grouped by species"""
         try:
+            # Check cache first
+            if self.db:
+                cached_data = self.db.get_user_species_cache(user_id, 'identifications')
+                if cached_data:
+                    st.info("Using cached identification data")
+                    return cached_data[:limit]
+            
             all_species = []
             page = 1
             
@@ -211,6 +235,10 @@ class iNaturalistAPI:
                 # If we hit the limit, break
                 if len(all_species) >= limit:
                     break
+            
+            # Cache the results
+            if self.db and all_species:
+                self.db.cache_user_species(user_id, 'identifications', all_species)
             
             return all_species[:limit]
             
@@ -286,6 +314,12 @@ class iNaturalistAPI:
     def get_species_observers_leaderboard(self, taxon_id: int, place_id: Optional[int] = None) -> List[Dict]:
         """Get leaderboard of observers for a specific species"""
         try:
+            # Check cache first
+            if self.db and not place_id:  # Only cache global leaderboards for now
+                cached_data = self.db.get_species_leaderboard(taxon_id, 'observers')
+                if cached_data:
+                    return cached_data
+            
             params = {
                 "taxon_id": taxon_id,
                 "per_page": 100,
@@ -296,7 +330,13 @@ class iNaturalistAPI:
                 params["place_id"] = place_id
             
             response = self._make_request("/observations/observers", params)
-            return response.get('results', [])
+            results = response.get('results', [])
+            
+            # Cache the results (only for global leaderboards)
+            if self.db and not place_id and results:
+                self.db.cache_species_leaderboard(taxon_id, 'observers', results)
+            
+            return results
             
         except Exception as e:
             st.error(f"Error fetching species observers leaderboard: {str(e)}")
@@ -305,6 +345,12 @@ class iNaturalistAPI:
     def get_species_identifiers_leaderboard(self, taxon_id: int, place_id: Optional[int] = None) -> List[Dict]:
         """Get leaderboard of identifiers for a specific species"""
         try:
+            # Check cache first
+            if self.db and not place_id:  # Only cache global leaderboards for now
+                cached_data = self.db.get_species_leaderboard(taxon_id, 'identifiers')
+                if cached_data:
+                    return cached_data
+            
             params = {
                 "taxon_id": taxon_id,
                 "per_page": 100
@@ -314,7 +360,13 @@ class iNaturalistAPI:
                 params["place_id"] = place_id
             
             response = self._make_request("/identifications/identifiers", params)
-            return response.get('results', [])
+            results = response.get('results', [])
+            
+            # Cache the results (only for global leaderboards)
+            if self.db and not place_id and results:
+                self.db.cache_species_leaderboard(taxon_id, 'identifiers', results)
+            
+            return results
             
         except Exception as e:
             st.error(f"Error fetching species identifiers leaderboard: {str(e)}")

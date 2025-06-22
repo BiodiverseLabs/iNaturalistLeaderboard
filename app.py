@@ -107,6 +107,10 @@ def fetch_user_data(username):
         st.session_state.observer_rankings = observer_rankings
         st.session_state.identifier_rankings = identifier_rankings
         
+        # Clean up old cache entries periodically
+        if hasattr(api_client, 'db') and api_client.db:
+            api_client.db.cleanup_old_cache()
+        
         # Clear progress elements
         observer_progress_bar.empty()
         identifier_progress_bar.empty()
