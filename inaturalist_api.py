@@ -222,13 +222,6 @@ class iNaturalistAPI:
                     continue
                 processed_taxons.add(taxon_id)
                 
-                # Skip if we\'ve already processed this taxon (avoid duplicates)
-                if taxon_id in processed_taxons:
-                    if progress_callback:
-                        progress_callback(i + 1, total_species, 0)
-                    continue
-                processed_taxons.add(taxon_id)
-                
                 # Update progress BEFORE API call to avoid counting during retries
                 if progress_callback:
                     progress_callback(i + 1, total_species, 0)
@@ -339,13 +332,6 @@ class iNaturalistAPI:
                     if progress_callback:
                         progress_callback(i + 1, total_species, 0)
                     continue
-                
-                # Skip if we\'ve already processed this taxon (avoid duplicates)
-                if taxon_id in processed_taxons:
-                    if progress_callback:
-                        progress_callback(i + 1, total_species, 0)
-                    continue
-                processed_taxons.add(taxon_id)
                 
                 # Skip if we\'ve already processed this taxon (avoid duplicates)
                 if taxon_id in processed_taxons:
