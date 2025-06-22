@@ -84,12 +84,18 @@ The application is configured for deployment on Replit's platform:
   - Database shows 66+ species already cached, dramatically reducing future API calls
   - Automatic cleanup of old cache entries after 7 days
 
+- **June 22, 2025 - Enhanced Progress Estimation**: Fixed time calculation accuracy:
+  - Replaced misleading elapsed-time-based estimates with rate-limiting-aware calculations
+  - Progress now estimates based on cache hit ratio and 2-second API call delays
+  - Sampling algorithm checks upcoming species for cache availability
+  - Realistic time estimates account for the difference between cached (0.1s) vs API calls (2s)
+
 - **June 22, 2025 - Enhanced Error Logging & Rate Limiting**: Comprehensive debugging and API optimization:
   - Added detailed error logging with endpoint, status code, headers, and response body
   - Enhanced retry logic with detailed attempt tracking and warning messages
   - Function-specific error context (user ID, taxon ID, data sizes)
   - Database error logging with operation details and data metrics
-  - Set delays to 1 second between API calls (60 calls per minute, under iNat's 100/min limit)
+  - Set delays to 2 seconds between API calls (30 calls per minute, conservative rate)
   - Added exponential backoff retry logic for 429 errors (5s, 10s, 15s)
 
 - **June 22, 2025 - Added Top 3 Global Rankings**: Expanded dashboard to show comprehensive ranking data:
