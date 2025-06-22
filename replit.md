@@ -84,11 +84,11 @@ The application is configured for deployment on Replit's platform:
   - Database shows 66+ species already cached, dramatically reducing future API calls
   - Automatic cleanup of old cache entries after 7 days
 
-- **June 22, 2025 - Enhanced Progress Estimation**: Fixed time calculation accuracy:
-  - Replaced misleading elapsed-time-based estimates with rate-limiting-aware calculations
-  - Progress now estimates based on cache hit ratio and 2-second API call delays
-  - Sampling algorithm checks upcoming species for cache availability
-  - Realistic time estimates account for the difference between cached (0.1s) vs API calls (2s)
+- **June 22, 2025 - Optimized Progress Performance**: Fixed major performance bottleneck:
+  - Removed expensive database sampling (10 queries per species) from progress estimation
+  - Simplified to conservative estimate: 30% cached (0.1s) + 70% API calls (2s)
+  - Cached data now processes at full speed without progress callback overhead
+  - Fixed delays that were only happening during actual API calls, not cached lookups
 
 - **June 22, 2025 - Enhanced Error Logging & Rate Limiting**: Comprehensive debugging and API optimization:
   - Added detailed error logging with endpoint, status code, headers, and response body
