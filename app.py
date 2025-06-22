@@ -28,16 +28,6 @@ if 'show_identifier_details' not in st.session_state:
     st.session_state.show_identifier_details = {1: False, 2: False, 3: False}
 if 'cached_data' not in st.session_state:
     st.session_state.cached_data = False
-if 'show_cached_users' not in st.session_state:
-    st.session_state.show_cached_users = False
-if 'processing_user' not in st.session_state:
-    st.session_state.processing_user = None
-if 'processing_complete' not in st.session_state:
-    st.session_state.processing_complete = False
-if 'admin_mode_user' not in st.session_state:
-    st.session_state.admin_mode_user = None
-if 'admin_authenticated' not in st.session_state:
-    st.session_state.admin_authenticated = False
 
 # Initialize API client
 api_client = iNaturalistAPI()
@@ -124,15 +114,9 @@ def reset_session_state():
 def fetch_user_data(username):
     """Fetch comprehensive user data from iNaturalist API"""
     try:
-        st.write(f"🔍 Starting data fetch for user: {username}")
-        st.write(f"DEBUG: api_client exists: {api_client is not None}")
-        st.write(f"DEBUG: api_client.db exists: {hasattr(api_client, 'db') and api_client.db is not None}")
-        
         # Check if we have cached complete rankings for this user first
         if hasattr(api_client, 'db') and api_client.db:
-            st.write(f"DEBUG: Checking cache for user: {username}")
             cached_rankings = api_client.db.get_user_rankings_cache(username)
-            st.write(f"DEBUG: Cache result: {cached_rankings is not None}")
             if cached_rankings:
                 st.success(f"✅ Found cached data for {username} from {cached_rankings['cached_at'].strftime('%Y-%m-%d %H:%M:%S')} - loading instantly!")
                 
@@ -165,14 +149,10 @@ def fetch_user_data(username):
                 return True
         
         # Get user basic info
-        st.write(f"DEBUG: No cached data found, fetching fresh data for {username}")
         with st.spinner(f"Looking up user: {username}..."):
-            st.write(f"DEBUG: Calling api_client.get_user_info('{username}')")
             user_info = api_client.get_user_info(username)
-            st.write(f"DEBUG: User info result: {user_info is not None}")
             if not user_info:
                 st.error(f"User '{username}' not found. Please check the username and try again.")
-                st.write(f"DEBUG: get_user_info returned None/False for {username}")
                 return False
         
         st.success(f"Found user: {user_info.get('name', username)}")
@@ -248,14 +228,10 @@ def fetch_user_data(username):
         observer_progress_bar.empty()
         identifier_progress_bar.empty()
         
-        st.write(f"DEBUG: fetch_user_data completed successfully for {username}")
         return True
         
     except Exception as e:
         st.error(f"Error fetching user data: {str(e)}")
-        st.write(f"DEBUG: Exception in fetch_user_data: {type(e).__name__}: {e}")
-        import traceback
-        st.code(traceback.format_exc())
         return False
 
 def display_species_panel(title, species_list, detail_key, icon):
@@ -289,57 +265,10 @@ def display_species_panel(title, species_list, detail_key, icon):
     else:
         st.info(f"No species found where user is top {detail_key.replace('_', ' ')}.")
 
-def get_cached_users():
-    """Get list of users with cached data"""
-    try:
-        if hasattr(api_client, 'db') and api_client.db:
-            from sqlalchemy import text
-            cached_users = api_client.db.session.execute(
-                text('SELECT username, created_at FROM user_rankings_cache ORDER BY created_at DESC')
-            ).fetchall()
-            return [(user[0], user[1]) for user in cached_users]
-    except:
-        pass
-    return []
-
 def main():
     # Header
-    st.title("🏆 iNaturalist User Leaderboards Dashboard")
-    st.markdown("Discover where users rank globally as observers and identifiers for different species.")
-    
-    # DEBUG: Always show session state
-    with st.expander("🐛 DEBUG Session State", expanded=False):
-        st.write("Current session state:")
-        st.json({
-            "admin_mode_user": st.session_state.get('admin_mode_user'),
-            "admin_authenticated": st.session_state.get('admin_authenticated'),
-            "user_data": st.session_state.get('user_data') is not None,
-            "show_cached_users": st.session_state.get('show_cached_users'),
-        })
-    
-    # Show cached users button (standalone)
-    cached_users = get_cached_users()
-    if cached_users:
-        if st.button("📋 Show Users with Leaderboard Data", help="View users already processed"):
-            st.session_state.show_cached_users = not st.session_state.get('show_cached_users', False)
-    
-    # Display cached users list
-    if st.session_state.get('show_cached_users', False) and cached_users:
-        st.markdown("### 📊 Users with Cached Leaderboard Data")
-        
-        for username, created_at in cached_users:
-            col1, col2, col3 = st.columns([2, 2, 1])
-            with col1:
-                st.text(f"@{username}")
-            with col2:
-                st.text(f"Processed: {created_at.strftime('%Y-%m-%d')}")
-            with col3:
-                if st.button("Load", key=f"load_{username}"):
-                    reset_session_state()
-                    if fetch_user_data(username):
-                        st.session_state.show_cached_users = False
-                        st.rerun()
-        st.markdown("---")
+    st.title("🔍 iNaturalist User Leaderboards")
+    st.markdown("Enter an iNaturalist username to view their leaderboard statistics")
     
     # Username input
     col1, col2 = st.columns([3, 1])
@@ -355,103 +284,14 @@ def main():
         st.write("")  # Add some spacing
         search_button = st.button("Search", type="primary", use_container_width=True)
     
-    # Handle search with admin control
+    # Handle search
     if search_button and username:
-        username = username.strip()
-        st.write(f"DEBUG: Search button clicked for username: {username}")
         reset_session_state()
-        
-        # Check if user is cached first
-        if hasattr(api_client, 'db') and api_client.db:
-            cached_data = api_client.db.get_user_rankings_cache(username)
-            st.write(f"DEBUG: Cache check result: {cached_data is not None}")
-            if cached_data:
-                # User is cached, load directly
-                st.write(f"DEBUG: Loading cached data for {username}")
-                if fetch_user_data(username):
-                    st.rerun()
-                return
-        
-        # User not cached - require admin access
-        st.warning(f"⏳ Leaderboard data for '{username}' has not been processed yet.")
-        st.info("📧 To request processing for this user, please contact **@stevilkinevil** with the username.")
-        st.markdown("---")
-        
-        # Set admin mode for this user
-        st.session_state.admin_mode_user = username
-        st.session_state.admin_authenticated = False
-        
-        # Show admin interface immediately
-        with st.expander("🔒 Admin Processing (Password Required)", expanded=True):
-            st.write(f"Ready to process user: {username}")
-            admin_password = st.text_input("Admin Password:", type="password", key="admin_password_immediate")
-            
-            if st.button("🚀 Start Processing", key="process_btn_immediate", type="secondary"):
-                st.write(f"DEBUG: Button clicked, password: {'***' if admin_password else 'empty'}")
-                if admin_password == "booty":
-                    st.write("DEBUG: Setting admin_authenticated = True")
-                    st.session_state.admin_authenticated = True
-                    st.write(f"DEBUG: Session state updated: {st.session_state.admin_authenticated}")
-                    st.success("Admin access granted. Processing will start...")
-                    st.write("DEBUG: About to call st.rerun()")
-                    st.rerun()
-                else:
-                    st.error("Invalid admin password")
-                    st.write(f"DEBUG: Invalid password entered: '{admin_password}'")
-        
-        # Add a button to view results if processing completed
-        if st.session_state.processing_complete:
-            if st.button("📊 View Results", type="primary"):
-                st.session_state.processing_user = None
-                st.session_state.processing_complete = False
-                st.rerun()
-        
-        return
+        if fetch_user_data(username):
+            st.success(f"Data loaded successfully for user: {username}")
+            st.rerun()
     elif search_button and not username:
         st.warning("Please enter a username to search.")
-    
-    # Handle authenticated admin mode
-    if st.session_state.admin_mode_user and st.session_state.admin_authenticated:
-        username = st.session_state.admin_mode_user
-        st.write(f"🔐 Admin authenticated for user: {username}")
-        
-        # Admin processing section
-        with st.expander("🚀 Processing User Data", expanded=True):
-            st.write("Starting user data processing...")
-            
-            try:
-                st.write("Step 1: Looking up user...")
-                user_info = api_client.get_user_info(username)
-                if user_info:
-                    st.success(f"✅ Found user: {user_info.get('login', username)}")
-                    
-                    st.write("Step 2: Starting full processing...")
-                    if fetch_user_data(username):
-                        st.success("✅ Processing completed successfully!")
-                        st.balloons()
-                        
-                        # Clear admin state
-                        st.session_state.admin_mode_user = None
-                        st.session_state.admin_authenticated = False
-                        
-                        st.write("Redirecting to results in 3 seconds...")
-                        time.sleep(3)
-                        st.rerun()
-                    else:
-                        st.error("❌ Processing failed")
-                else:
-                    st.error(f"❌ User '{username}' not found")
-                    
-            except Exception as e:
-                st.error(f"❌ Exception during processing: {e}")
-                import traceback
-                st.code(traceback.format_exc())
-            
-            # Cancel button
-            if st.button("❌ Cancel Processing", key="cancel_processing"):
-                st.session_state.admin_mode_user = None
-                st.session_state.admin_authenticated = False
-                st.rerun()
     
     # Display user data if available
     if st.session_state.user_data:

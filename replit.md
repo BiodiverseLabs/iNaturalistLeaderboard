@@ -76,14 +76,6 @@ The application is configured for deployment on Replit's platform:
 
 ## Recent Changes
 
-- **June 22, 2025 - Added Admin-Controlled Processing for Public Deployment**: Protected against API rate limiting:
-  - Added cache-first user lookup to instantly load previously processed users
-  - Non-cached users show message to contact @stevilkinevil for processing requests
-  - Admin password protection ("booty") required to process new users
-  - Added "Show Users with Leaderboard Data" button to browse cached users
-  - Cached users can be selected and loaded instantly without password
-  - Designed for public deployment while preventing API abuse
-
 - **June 22, 2025 - Standardized API Rate Limiting**: Fixed inconsistent delays causing rate limit issues:
   - Changed pagination API delays from 0.1s to 1.3s for consistent rate limiting
   - All API calls now use uniform 1.3-second delays (50 calls per minute)
