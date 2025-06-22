@@ -84,6 +84,11 @@ The application is configured for deployment on Replit's platform:
   - Database shows 66+ species already cached, dramatically reducing future API calls
   - Automatic cleanup of old cache entries after 7 days
 
+- **June 22, 2025 - Fixed Duplicate Rankings Bug**: Corrected logic error causing species to appear in multiple ranking positions:
+  - Users now only appear in their highest rank position for each species
+  - Eliminated duplicate species appearing in #1, #2, and #3 rankings simultaneously
+  - Improved ranking logic to take first (best) rank found and skip subsequent matches
+
 - **June 22, 2025 - Optimized Progress Performance**: Fixed major performance bottleneck:
   - Removed expensive database sampling (10 queries per species) from progress estimation
   - Simplified to conservative estimate: 30% cached (0.1s) + 70% API calls (2s)

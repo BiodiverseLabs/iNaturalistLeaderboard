@@ -222,18 +222,22 @@ class iNaturalistAPI:
                 observers = self.get_species_observers_leaderboard(taxon_id)
                 
                 if observers and len(observers) >= 3:
-                    # Check if our user is in top 3
+                    # Check if our user is in top 3 - only take the FIRST (highest) rank found
+                    user_found_rank = None
                     for rank, observer in enumerate(observers[:3], 1):
                         if observer.get('user_id') == user_id:
-                            rankings[rank].append({
-                                'scientific_name': taxon.get('name', 'Unknown'),
-                                'common_name': taxon.get('preferred_common_name', 'No common name'),
-                                'observation_count': user_count,
-                                'taxon_id': taxon_id,
-                                'rank': taxon.get('rank', 'unknown'),
-                                'global_rank': rank
-                            })
-                            break
+                            user_found_rank = rank
+                            break  # Take the first (highest) rank only
+                    
+                    if user_found_rank:
+                        rankings[user_found_rank].append({
+                            'scientific_name': taxon.get('name', 'Unknown'),
+                            'common_name': taxon.get('preferred_common_name', 'No common name'),
+                            'observation_count': user_count,
+                            'taxon_id': taxon_id,
+                            'rank': taxon.get('rank', 'unknown'),
+                            'global_rank': user_found_rank
+                        })
                 
                 # No delay here - delays are handled inside the leaderboard functions
             
@@ -328,18 +332,22 @@ class iNaturalistAPI:
                 identifiers = self.get_species_identifiers_leaderboard(taxon_id)
                 
                 if identifiers and len(identifiers) >= 3:
-                    # Check if our user is in top 3
+                    # Check if our user is in top 3 - only take the FIRST (highest) rank found
+                    user_found_rank = None
                     for rank, identifier in enumerate(identifiers[:3], 1):
                         if identifier.get('user_id') == user_id:
-                            rankings[rank].append({
-                                'scientific_name': taxon.get('name', 'Unknown'),
-                                'common_name': taxon.get('preferred_common_name', 'No common name'),
-                                'identification_count': user_count,
-                                'taxon_id': taxon_id,
-                                'rank': taxon.get('rank', 'unknown'),
-                                'global_rank': rank
-                            })
-                            break
+                            user_found_rank = rank
+                            break  # Take the first (highest) rank only
+                    
+                    if user_found_rank:
+                        rankings[user_found_rank].append({
+                            'scientific_name': taxon.get('name', 'Unknown'),
+                            'common_name': taxon.get('preferred_common_name', 'No common name'),
+                            'identification_count': user_count,
+                            'taxon_id': taxon_id,
+                            'rank': taxon.get('rank', 'unknown'),
+                            'global_rank': user_found_rank
+                        })
                 
                 # No delay here - delays are handled inside the leaderboard functions
             
