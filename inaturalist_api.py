@@ -36,7 +36,15 @@ class iNaturalistAPI:
                         if 'rate' in header.lower() or 'limit' in header.lower() or 'retry' in header.lower():
                             headers_info.append(f"{header}: {value}")
                     
-                    st.error(f"Rate limit hit (429). Headers: {', '.join(headers_info) if headers_info else 'No rate limit headers found'}")
+                    error_msg = f"Rate limit hit (429). Headers: {', '.join(headers_info) if headers_info else 'No rate limit headers found'}"
+                    st.error(error_msg)
+                    
+                    # Also log the full response for debugging
+                    try:
+                        if hasattr(response, 'text'):
+                            st.error(f"429 Response body: {response.text[:300]}")
+                    except:
+                        pass
                     
                     if attempt < retry_count - 1:
                         wait_time = (attempt + 1) * 5  # Exponential backoff: 5s, 10s, 15s
@@ -239,9 +247,9 @@ class iNaturalistAPI:
                 if self.db:
                     cached_data = self.db.get_species_leaderboard(taxon_id, 'observers')
                     if not cached_data:  # Only delay if we made a fresh API call
-                        time.sleep(1.0)  # 60 calls per minute max
+                        time.sleep(2.0)  # Conservative: 30 calls per minute max
                 else:
-                    time.sleep(1.0)  # 60 calls per minute max
+                    time.sleep(2.0)  # Conservative: 30 calls per minute max
             
             # Final progress update
             if progress_callback:
@@ -359,9 +367,9 @@ class iNaturalistAPI:
                 if self.db:
                     cached_data = self.db.get_species_leaderboard(taxon_id, 'identifiers')
                     if not cached_data:  # Only delay if we made a fresh API call
-                        time.sleep(1.0)  # 60 calls per minute max
+                        time.sleep(2.0)  # Conservative: 30 calls per minute max
                 else:
-                    time.sleep(1.0)  # 60 calls per minute max
+                    time.sleep(2.0)  # Conservative: 30 calls per minute max
             
             # Final progress update
             if progress_callback:
