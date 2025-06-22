@@ -32,6 +32,15 @@ if 'cached_data' not in st.session_state:
 # Initialize API client
 api_client = iNaturalistAPI()
 
+def safe_get_ranking(rankings_data, rank):
+    """Safely get ranking data handling both integer and string keys"""
+    if rank in rankings_data:
+        return rankings_data[rank]
+    elif str(rank) in rankings_data:
+        return rankings_data[str(rank)]
+    else:
+        return []
+
 def create_csv_export(rankings_data, ranking_type):
     """Create CSV data for all top 100 rankings export"""
     csv_rows = []
@@ -47,8 +56,10 @@ def create_csv_export(rankings_data, ranking_type):
         # Fallback to top 3 data for backwards compatibility
         species_list = []
         for rank in [1, 2, 3]:
-            if rank in rankings_data and rankings_data[rank]:
-                species_list.extend(rankings_data[rank])
+            # Handle both integer and string keys for cached data
+            rank_key = rank if rank in rankings_data else str(rank)
+            if rank_key in rankings_data and rankings_data[rank_key]:
+                species_list.extend(rankings_data[rank_key])
     
     # Sort by global rank
     species_list = sorted(species_list, key=lambda x: x.get('global_rank', 999))
@@ -109,14 +120,30 @@ def fetch_user_data(username):
             if cached_rankings:
                 st.success(f"✅ Found cached data for {username} from {cached_rankings['cached_at'].strftime('%Y-%m-%d %H:%M:%S')} - loading instantly!")
                 
-                # Load from cache
+                # Load from cache - convert string keys to integer keys
                 st.session_state.user_data = {
                     'id': cached_rankings['user_id'],
                     'login': cached_rankings['username'],
                     'name': cached_rankings['username']
                 }
-                st.session_state.observer_rankings = cached_rankings['observer_rankings']
-                st.session_state.identifier_rankings = cached_rankings['identifier_rankings'] 
+                
+                # Convert string keys to integer keys for consistency
+                observer_rankings = {}
+                for key, value in cached_rankings['observer_rankings'].items():
+                    try:
+                        observer_rankings[int(key)] = value
+                    except (ValueError, TypeError):
+                        observer_rankings[key] = value
+                
+                identifier_rankings = {}
+                for key, value in cached_rankings['identifier_rankings'].items():
+                    try:
+                        identifier_rankings[int(key)] = value
+                    except (ValueError, TypeError):
+                        identifier_rankings[key] = value
+                
+                st.session_state.observer_rankings = observer_rankings
+                st.session_state.identifier_rankings = identifier_rankings
                 st.session_state.total_observations = cached_rankings['total_observations']
                 st.session_state.cached_data = True
                 return True
@@ -290,8 +317,9 @@ def main():
                     if total_count == 0:
                         # Fallback counting for top 3 structure
                         for rank in [1, 2, 3]:
-                            if rank in st.session_state.observer_rankings:
-                                total_count += len(st.session_state.observer_rankings[rank])
+                            rank_key = rank if rank in st.session_state.observer_rankings else str(rank)
+                            if rank_key in st.session_state.observer_rankings:
+                                total_count += len(st.session_state.observer_rankings[rank_key])
                     
                     st.download_button(
                         label=f"📥 Export Observer CSV ({total_count} species)",
@@ -312,8 +340,9 @@ def main():
                     if total_count == 0:
                         # Fallback counting for top 3 structure
                         for rank in [1, 2, 3]:
-                            if rank in st.session_state.identifier_rankings:
-                                total_count += len(st.session_state.identifier_rankings[rank])
+                            rank_key = rank if rank in st.session_state.identifier_rankings else str(rank)
+                            if rank_key in st.session_state.identifier_rankings:
+                                total_count += len(st.session_state.identifier_rankings[rank_key])
                     
                     st.download_button(
                         label=f"📥 Export Identifier CSV ({total_count} species)",
@@ -332,7 +361,7 @@ def main():
         with obs_col1:
             with st.container():
                 st.markdown("### 🥇 #1 Observer")
-                count_1 = len(st.session_state.observer_rankings[1])
+                count_1 = len(safe_get_ranking(st.session_state.observer_rankings, 1))
                 st.metric("Species Count", count_1)
                 if count_1 > 0:
                     button_1_clicked = st.button("View #1 Species", key="observer_1_details")
@@ -349,7 +378,7 @@ def main():
         with obs_col2:
             with st.container():
                 st.markdown("### 🥈 #2 Observer")
-                count_2 = len(st.session_state.observer_rankings[2])
+                count_2 = len(safe_get_ranking(st.session_state.observer_rankings, 2))
                 st.metric("Species Count", count_2)
                 if count_2 > 0:
                     button_2_clicked = st.button("View #2 Species", key="observer_2_details")
@@ -366,7 +395,7 @@ def main():
         with obs_col3:
             with st.container():
                 st.markdown("### 🥉 #3 Observer")
-                count_3 = len(st.session_state.observer_rankings[3])
+                count_3 = len(safe_get_ranking(st.session_state.observer_rankings, 3))
                 st.metric("Species Count", count_3)
                 if count_3 > 0:
                     button_3_clicked = st.button("View #3 Species", key="observer_3_details")
@@ -388,7 +417,7 @@ def main():
         with id_col1:
             with st.container():
                 st.markdown("### 🥇 #1 Identifier")
-                count_1 = len(st.session_state.identifier_rankings[1])
+                count_1 = len(safe_get_ranking(st.session_state.identifier_rankings, 1))
                 st.metric("Species Count", count_1)
                 if count_1 > 0:
                     button_1_clicked = st.button("View #1 Species", key="identifier_1_details")
@@ -405,7 +434,7 @@ def main():
         with id_col2:
             with st.container():
                 st.markdown("### 🥈 #2 Identifier")
-                count_2 = len(st.session_state.identifier_rankings[2])
+                count_2 = len(safe_get_ranking(st.session_state.identifier_rankings, 2))
                 st.metric("Species Count", count_2)
                 if count_2 > 0:
                     button_2_clicked = st.button("View #2 Species", key="identifier_2_details")
@@ -422,7 +451,7 @@ def main():
         with id_col3:
             with st.container():
                 st.markdown("### 🥉 #3 Identifier")
-                count_3 = len(st.session_state.identifier_rankings[3])
+                count_3 = len(safe_get_ranking(st.session_state.identifier_rankings, 3))
                 st.metric("Species Count", count_3)
                 if count_3 > 0:
                     button_3_clicked = st.button("View #3 Species", key="identifier_3_details")
@@ -453,11 +482,11 @@ def main():
                 active_observer_rank = rank
                 break
         
-        if active_observer_rank and st.session_state.observer_rankings[active_observer_rank]:
+        if active_observer_rank and safe_get_ranking(st.session_state.observer_rankings, active_observer_rank):
             st.write("---")
             rank_labels = {1: "🥇 #1", 2: "🥈 #2", 3: "🥉 #3"}
             st.subheader(f"👁️ Species Where User is {rank_labels[active_observer_rank]} Observer Globally")
-            df_observer = pd.DataFrame(st.session_state.observer_rankings[active_observer_rank])
+            df_observer = pd.DataFrame(safe_get_ranking(st.session_state.observer_rankings, active_observer_rank))
             if not df_observer.empty:
                 # Format the dataframe for better display
                 display_cols = ['scientific_name', 'common_name', 'observation_count', 'rank']
@@ -476,11 +505,11 @@ def main():
                 active_identifier_rank = rank
                 break
         
-        if active_identifier_rank and st.session_state.identifier_rankings[active_identifier_rank]:
+        if active_identifier_rank and safe_get_ranking(st.session_state.identifier_rankings, active_identifier_rank):
             st.write("---")
             rank_labels = {1: "🥇 #1", 2: "🥈 #2", 3: "🥉 #3"}
             st.subheader(f"🏷️ Species Where User is {rank_labels[active_identifier_rank]} Identifier Globally")
-            df_identifier = pd.DataFrame(st.session_state.identifier_rankings[active_identifier_rank])
+            df_identifier = pd.DataFrame(safe_get_ranking(st.session_state.identifier_rankings, active_identifier_rank))
             if not df_identifier.empty:
                 # Format the dataframe for better display
                 display_cols = ['scientific_name', 'common_name', 'identification_count', 'rank']
