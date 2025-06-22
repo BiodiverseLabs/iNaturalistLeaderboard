@@ -14,20 +14,42 @@ class iNaturalistAPI:
             'Accept': 'application/json'
         })
     
-    def _make_request(self, endpoint: str, params: Dict = None) -> Dict:
-        """Make a request to the iNaturalist API with error handling"""
+    def _make_request(self, endpoint: str, params: Dict = None, retry_count: int = 3) -> Dict:
+        """Make a request to the iNaturalist API with error handling and retry logic"""
         url = f"{self.base_url}{endpoint}"
         
-        try:
-            response = self.session.get(url, params=params, timeout=30)
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.RequestException as e:
-            st.error(f"API request failed: {str(e)}")
-            raise
-        except Exception as e:
-            st.error(f"Unexpected error: {str(e)}")
-            raise
+        for attempt in range(retry_count):
+            try:
+                response = self.session.get(url, params=params, timeout=30)
+                
+                # Handle rate limiting
+                if response.status_code == 429:
+                    if attempt < retry_count - 1:
+                        wait_time = (attempt + 1) * 2  # Exponential backoff: 2s, 4s, 6s
+                        st.warning(f"Rate limit hit. Waiting {wait_time} seconds before retry...")
+                        time.sleep(wait_time)
+                        continue
+                    else:
+                        st.error("Rate limit exceeded. Please try again later.")
+                        raise requests.exceptions.HTTPError("429 Too Many Requests")
+                
+                response.raise_for_status()
+                return response.json()
+                
+            except requests.exceptions.HTTPError as e:
+                if response.status_code == 429 and attempt < retry_count - 1:
+                    continue
+                st.error(f"API request failed: {str(e)}")
+                raise
+            except requests.exceptions.RequestException as e:
+                if attempt < retry_count - 1:
+                    time.sleep(1)  # Brief wait before retry
+                    continue
+                st.error(f"API request failed: {str(e)}")
+                raise
+            except Exception as e:
+                st.error(f"Unexpected error: {str(e)}")
+                raise
     
     def get_user_info(self, username: str) -> Optional[Dict]:
         """Get user information by username"""
@@ -104,8 +126,8 @@ class iNaturalistAPI:
         Returns a dictionary with rankings: {1: [...], 2: [...], 3: [...]}
         """
         try:
-            # Get ALL user's observed species (no limit to get complete data)
-            user_species = self.get_user_observations_by_species(user_id, 10000)
+            # Get user's observed species (reasonable limit to avoid rate limiting)
+            user_species = self.get_user_observations_by_species(user_id, 500)
             
             rankings = {1: [], 2: [], 3: []}
             total_species = len(user_species)
@@ -202,8 +224,8 @@ class iNaturalistAPI:
         Returns a dictionary with rankings: {1: [...], 2: [...], 3: [...]}
         """
         try:
-            # Get ALL user's identified species (no limit to get complete data)
-            user_species = self.get_user_identifications_by_species(user_id, 10000)
+            # Get user's identified species (reasonable limit to avoid rate limiting)
+            user_species = self.get_user_identifications_by_species(user_id, 500)
             
             rankings = {1: [], 2: [], 3: []}
             total_species = len(user_species)
