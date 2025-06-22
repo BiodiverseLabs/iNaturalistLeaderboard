@@ -344,13 +344,16 @@ def main():
     # Handle search with admin control
     if search_button and username:
         username = username.strip()
+        st.write(f"DEBUG: Search button clicked for username: {username}")
         reset_session_state()
         
         # Check if user is cached first
         if hasattr(api_client, 'db') and api_client.db:
             cached_data = api_client.db.get_user_rankings_cache(username)
+            st.write(f"DEBUG: Cache check result: {cached_data is not None}")
             if cached_data:
                 # User is cached, load directly
+                st.write(f"DEBUG: Loading cached data for {username}")
                 if fetch_user_data(username):
                     st.rerun()
                 return
@@ -360,46 +363,34 @@ def main():
         st.info("📧 To request processing for this user, please contact **@stevilkinevil** with the username.")
         st.markdown("---")
         
-        # Admin processing section
+        # Admin processing section with simplified debugging
+        st.write(f"DEBUG MAIN: At admin section for user: {username}")
+        st.write(f"DEBUG MAIN: Session state keys: {list(st.session_state.keys())}")
+        
         with st.expander("🔒 Admin Processing (Password Required)", expanded=True):
             admin_password = st.text_input("Admin Password:", type="password", key="admin_password")
-            process_button = st.button("🚀 Start Processing", type="secondary", key="admin_process")
             
-            if process_button:
-                st.write(f"DEBUG: Button clicked, password entered: {'***' if admin_password else 'None'}")
+            if st.button("🚀 Start Processing", key="process_btn", type="secondary"):
+                st.write("DEBUG: Process button clicked!")
+                st.write(f"DEBUG: Password check: {admin_password == 'booty'}")
                 
                 if admin_password == "booty":
-                    st.success("✅ Admin access granted. Starting processing...")
-                    st.info("🔄 Processing user data - this may take several minutes...")
-                    st.write(f"DEBUG: About to call fetch_user_data('{username}')")
+                    st.write("SUCCESS: Password correct, starting processing...")
                     
-                    # Set processing state
-                    st.session_state.processing_user = username
-                    st.session_state.processing_complete = False
-                    
-                    # Process the user data
+                    # Just test basic functionality first
                     try:
-                        st.write(f"DEBUG: Calling fetch_user_data with username: {username}")
-                        success = fetch_user_data(username)
-                        st.write(f"DEBUG: fetch_user_data returned: {success}")
-                        
-                        if success:
-                            st.success(f"✅ Processing completed successfully for {username}!")
-                            st.session_state.processing_complete = True
-                            st.balloons()
-                            # Don't call st.rerun() immediately - let user see the results
+                        st.write("Testing basic user lookup...")
+                        user_info = api_client.get_user_info(username)
+                        if user_info:
+                            st.write(f"SUCCESS: Found user {username}")
+                            st.json(user_info)
                         else:
-                            st.error("❌ Processing failed - please check the logs")
-                            st.write("DEBUG: fetch_user_data returned False")
+                            st.write(f"ERROR: User {username} not found")
                     except Exception as e:
-                        st.error(f"❌ Exception during processing: {str(e)}")
-                        st.write(f"DEBUG: Exception details: {type(e).__name__}: {e}")
-                        import traceback
-                        st.code(traceback.format_exc())
+                        st.write(f"ERROR: Exception during user lookup: {e}")
                         
-                elif admin_password:  # Only show error if password was entered
-                    st.error("❌ Invalid admin password")
-                    st.write(f"DEBUG: Invalid password entered: '{admin_password}'")
+                else:
+                    st.write("ERROR: Incorrect password")
         
         # Add a button to view results if processing completed
         if st.session_state.processing_complete:
