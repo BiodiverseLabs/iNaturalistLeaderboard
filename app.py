@@ -284,14 +284,43 @@ def main():
     
     with col2:
         st.write("")  # Add some spacing
-        search_button = st.button("Search", type="primary", use_container_width=True)
+        col2_left, col2_right = st.columns(2)
+        with col2_left:
+            search_button = st.button("Search", type="primary", use_container_width=True)
+        with col2_right:
+            if st.button("Reset", use_container_width=True):
+                reset_session_state()
+                st.session_state.admin_authenticated = False
+                st.rerun()
     
     # Handle search
     if search_button and username:
-        reset_session_state()
-        if fetch_user_data(username):
-            st.success(f"Data loaded successfully for user: {username}")
-            st.rerun()
+        # Check if admin authentication is required
+        if not st.session_state.admin_authenticated:
+            # Show password dialog using a modal-like approach
+            st.warning("⚠️ Admin access required to prevent API overuse")
+            
+            # Create a form for password input
+            with st.form("admin_auth_form", clear_on_submit=True):
+                password = st.text_input("Enter admin password:", type="password")
+                submit_auth = st.form_submit_button("Authenticate", type="primary")
+                
+                if submit_auth:
+                    if password == "booty":
+                        st.session_state.admin_authenticated = True
+                        st.success("✅ Authentication successful! Processing user data...")
+                        reset_session_state()
+                        if fetch_user_data(username):
+                            st.success(f"Data loaded successfully for user: {username}")
+                            st.rerun()
+                    else:
+                        st.error("❌ Incorrect password")
+        else:
+            # Already authenticated, proceed normally
+            reset_session_state()
+            if fetch_user_data(username):
+                st.success(f"Data loaded successfully for user: {username}")
+                st.rerun()
     elif search_button and not username:
         st.warning("Please enter a username to search.")
     
