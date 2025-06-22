@@ -94,31 +94,49 @@ class iNaturalistAPI:
             st.error(f"Error fetching user observations by species: {str(e)}")
             return []
     
-    def get_top_observer_species(self, user_id: int) -> List[Dict]:
+    def get_top_observer_species(self, user_id: int, progress_callback=None) -> List[Dict]:
         """
-        Get species where the user is the top observer.
-        This is a simplified implementation that gets the user's most observed species.
+        Get species where the user is the top observer globally.
+        This checks each species the user has observed to see if they're #1 globally.
         """
         try:
-            # Get user's top species by observation count
-            species_data = self.get_user_observations_by_species(user_id, 50)
+            # Get user's observed species (limit to top 50 to reduce API calls)
+            user_species = self.get_user_observations_by_species(user_id, 50)
             
-            top_species = []
-            for species in species_data:
-                if species.get('count', 0) > 0:
-                    taxon = species.get('taxon', {})
-                    top_species.append({
-                        'scientific_name': taxon.get('name', 'Unknown'),
-                        'common_name': taxon.get('preferred_common_name', 'No common name'),
-                        'observation_count': species.get('count', 0),
-                        'taxon_id': taxon.get('id'),
-                        'rank': taxon.get('rank', 'unknown')
-                    })
+            top_observer_species = []
             
-            # Sort by observation count (descending)
-            top_species.sort(key=lambda x: x['observation_count'], reverse=True)
+            # For each species, check if this user is the top observer
+            for i, species in enumerate(user_species):
+                if progress_callback and i % 5 == 0:  # Update progress every 5 species
+                    progress_callback(f"Checking species {i+1} of {len(user_species)}...")
+                
+                taxon = species.get('taxon', {})
+                taxon_id = taxon.get('id')
+                user_count = species.get('count', 0)
+                
+                if not taxon_id or user_count == 0:
+                    continue
+                
+                # Get the top observers for this species
+                observers = self.get_species_observers_leaderboard(taxon_id)
+                
+                if observers and len(observers) > 0:
+                    # Check if our user is the top observer
+                    top_observer = observers[0]
+                    if top_observer.get('user_id') == user_id:
+                        top_observer_species.append({
+                            'scientific_name': taxon.get('name', 'Unknown'),
+                            'common_name': taxon.get('preferred_common_name', 'No common name'),
+                            'observation_count': user_count,
+                            'taxon_id': taxon_id,
+                            'rank': taxon.get('rank', 'unknown'),
+                            'global_rank': 1
+                        })
+                
+                # Add delay to be respectful to API
+                time.sleep(0.15)
             
-            return top_species
+            return top_observer_species
             
         except Exception as e:
             st.error(f"Error fetching top observer species: {str(e)}")
@@ -153,31 +171,49 @@ class iNaturalistAPI:
             st.error(f"Error fetching user identifications by species: {str(e)}")
             return []
     
-    def get_top_identifier_species(self, user_id: int) -> List[Dict]:
+    def get_top_identifier_species(self, user_id: int, progress_callback=None) -> List[Dict]:
         """
-        Get species where the user is a top identifier.
-        This is a simplified implementation that gets the user's most identified species.
+        Get species where the user is a top identifier globally.
+        This checks each species the user has identified to see if they're #1 globally.
         """
         try:
-            # Get user's top species by identification count
-            species_data = self.get_user_identifications_by_species(user_id, 50)
+            # Get user's identified species (limit to top 50 to reduce API calls)
+            user_species = self.get_user_identifications_by_species(user_id, 50)
             
-            top_species = []
-            for species in species_data:
-                if species.get('count', 0) > 0:
-                    taxon = species.get('taxon', {})
-                    top_species.append({
-                        'scientific_name': taxon.get('name', 'Unknown'),
-                        'common_name': taxon.get('preferred_common_name', 'No common name'),
-                        'identification_count': species.get('count', 0),
-                        'taxon_id': taxon.get('id'),
-                        'rank': taxon.get('rank', 'unknown')
-                    })
+            top_identifier_species = []
             
-            # Sort by identification count (descending)
-            top_species.sort(key=lambda x: x['identification_count'], reverse=True)
+            # For each species, check if this user is the top identifier
+            for i, species in enumerate(user_species):
+                if progress_callback and i % 5 == 0:  # Update progress every 5 species
+                    progress_callback(f"Checking species {i+1} of {len(user_species)}...")
+                
+                taxon = species.get('taxon', {})
+                taxon_id = taxon.get('id')
+                user_count = species.get('count', 0)
+                
+                if not taxon_id or user_count == 0:
+                    continue
+                
+                # Get the top identifiers for this species
+                identifiers = self.get_species_identifiers_leaderboard(taxon_id)
+                
+                if identifiers and len(identifiers) > 0:
+                    # Check if our user is the top identifier
+                    top_identifier = identifiers[0]
+                    if top_identifier.get('user_id') == user_id:
+                        top_identifier_species.append({
+                            'scientific_name': taxon.get('name', 'Unknown'),
+                            'common_name': taxon.get('preferred_common_name', 'No common name'),
+                            'identification_count': user_count,
+                            'taxon_id': taxon_id,
+                            'rank': taxon.get('rank', 'unknown'),
+                            'global_rank': 1
+                        })
+                
+                # Add delay to be respectful to API
+                time.sleep(0.15)
             
-            return top_species
+            return top_identifier_species
             
         except Exception as e:
             st.error(f"Error fetching top identifier species: {str(e)}")

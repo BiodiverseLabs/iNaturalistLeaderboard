@@ -40,30 +40,57 @@ def reset_session_state():
 def fetch_user_data(username):
     """Fetch comprehensive user data from iNaturalist API"""
     try:
-        with st.spinner(f"Fetching data for user: {username}..."):
-            # Get user basic info
+        # Get user basic info
+        with st.spinner(f"Looking up user: {username}..."):
             user_info = api_client.get_user_info(username)
             if not user_info:
                 st.error(f"User '{username}' not found. Please check the username and try again.")
                 return False
-            
-            # Get user's total observations
+        
+        st.success(f"Found user: {user_info.get('name', username)}")
+        
+        # Get user's total observations
+        with st.spinner("Getting observation count..."):
             total_obs = api_client.get_user_observation_count(user_info['id'])
+        
+        # Create progress containers
+        progress_container = st.container()
+        
+        with progress_container:
+            st.info("⏳ Analyzing species where user is top observer globally... This may take a few minutes.")
+            observer_progress = st.empty()
             
-            # Get species where user is top observer
-            top_observer_species = api_client.get_top_observer_species(user_info['id'])
+        # Create progress callback function
+        def observer_progress_callback(message):
+            observer_progress.text(message)
             
-            # Get species where user is top identifier
-            top_identifier_species = api_client.get_top_identifier_species(user_info['id'])
+        # Get species where user is top observer
+        top_observer_species = api_client.get_top_observer_species(user_info['id'], observer_progress_callback)
+        observer_progress.success(f"✅ Found {len(top_observer_species)} species where user is top observer")
+        
+        with progress_container:
+            st.info("⏳ Analyzing species where user is top identifier globally...")
+            identifier_progress = st.empty()
             
-            # Update session state
-            st.session_state.user_data = user_info
-            st.session_state.total_observations = total_obs
-            st.session_state.top_observer_species = top_observer_species
-            st.session_state.top_identifier_species = top_identifier_species
+        # Create progress callback function
+        def identifier_progress_callback(message):
+            identifier_progress.text(message)
             
-            return True
-            
+        # Get species where user is top identifier  
+        top_identifier_species = api_client.get_top_identifier_species(user_info['id'], identifier_progress_callback)
+        identifier_progress.success(f"✅ Found {len(top_identifier_species)} species where user is top identifier")
+        
+        # Update session state
+        st.session_state.user_data = user_info
+        st.session_state.total_observations = total_obs
+        st.session_state.top_observer_species = top_observer_species
+        st.session_state.top_identifier_species = top_identifier_species
+        
+        # Clear progress messages
+        progress_container.empty()
+        
+        return True
+        
     except Exception as e:
         st.error(f"Error fetching user data: {str(e)}")
         return False
@@ -178,7 +205,13 @@ def main():
             st.subheader("👁️ Species Where User is Top Observer")
             df_observer = pd.DataFrame(st.session_state.top_observer_species)
             if not df_observer.empty:
-                st.dataframe(df_observer, use_container_width=True)
+                # Format the dataframe for better display
+                display_cols = ['scientific_name', 'common_name', 'observation_count', 'rank']
+                df_display = df_observer[display_cols].copy()
+                df_display.columns = ['Scientific Name', 'Common Name', 'Observations', 'Taxonomic Rank']
+                df_display['Common Name'] = df_display['Common Name'].fillna('No common name')
+                st.dataframe(df_display, use_container_width=True)
+                st.caption(f"Showing {len(df_observer)} species where this user has the most observations globally")
             else:
                 st.info("No detailed data available.")
         
@@ -187,7 +220,13 @@ def main():
             st.subheader("🏷️ Species Where User is Top Identifier")
             df_identifier = pd.DataFrame(st.session_state.top_identifier_species)
             if not df_identifier.empty:
-                st.dataframe(df_identifier, use_container_width=True)
+                # Format the dataframe for better display
+                display_cols = ['scientific_name', 'common_name', 'identification_count', 'rank']
+                df_display = df_identifier[display_cols].copy()
+                df_display.columns = ['Scientific Name', 'Common Name', 'Identifications', 'Taxonomic Rank']
+                df_display['Common Name'] = df_display['Common Name'].fillna('No common name')
+                st.dataframe(df_display, use_container_width=True)
+                st.caption(f"Showing {len(df_identifier)} species where this user has provided the most identifications globally")
             else:
                 st.info("No detailed data available.")
     
