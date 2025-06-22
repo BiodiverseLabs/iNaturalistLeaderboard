@@ -74,12 +74,20 @@ The application is configured for deployment on Replit's platform:
 - Environment variables not required (uses public API endpoints)
 - Automatic dependency resolution through uv.lock
 
-## Changelog
+## Recent Changes
 
-```
-Changelog:
-- June 22, 2025. Initial setup
-```
+- **June 22, 2025 - Enhanced Progress Tracking**: Added comprehensive progress bars with real-time tracking showing:
+  - Total species to process vs. completed
+  - Estimated time remaining based on processing speed
+  - Visual progress bar for both observer and identifier analysis
+  - Improved user experience during long processing times
+
+- **June 22, 2025 - Fixed Global Leaderboard Logic**: Updated API client to properly check global leaderboards:
+  - Each species is verified against iNaturalist's global observer/identifier rankings
+  - Users are only shown as "top" when they are actually ranked #1 globally for that species
+  - Replaced simple "most observed" lists with true global leadership positions
+
+- **June 22, 2025 - Initial Setup**: Created basic dashboard structure and API integration
 
 ## User Preferences
 

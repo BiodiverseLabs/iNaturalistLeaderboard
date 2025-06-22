@@ -53,32 +53,49 @@ def fetch_user_data(username):
         with st.spinner("Getting observation count..."):
             total_obs = api_client.get_user_observation_count(user_info['id'])
         
-        # Create progress containers
-        progress_container = st.container()
+        # Observer analysis with detailed progress
+        st.info("⏳ Analyzing species where user is top observer globally...")
+        observer_progress_bar = st.progress(0)
+        observer_status = st.empty()
+        observer_time_remaining = st.empty()
         
-        with progress_container:
-            st.info("⏳ Analyzing species where user is top observer globally... This may take a few minutes.")
-            observer_progress = st.empty()
-            
-        # Create progress callback function
-        def observer_progress_callback(message):
-            observer_progress.text(message)
-            
+        def observer_progress_callback(current, total, time_remaining):
+            progress = current / total if total > 0 else 0
+            observer_progress_bar.progress(progress)
+            observer_status.text(f"Processing species {current} of {total}")
+            if time_remaining > 0:
+                minutes = int(time_remaining // 60)
+                seconds = int(time_remaining % 60)
+                observer_time_remaining.text(f"Estimated time remaining: {minutes}m {seconds}s")
+            else:
+                observer_time_remaining.text("")
+        
         # Get species where user is top observer
         top_observer_species = api_client.get_top_observer_species(user_info['id'], observer_progress_callback)
-        observer_progress.success(f"✅ Found {len(top_observer_species)} species where user is top observer")
+        observer_status.success(f"✅ Found {len(top_observer_species)} species where user is top observer")
+        observer_time_remaining.empty()
         
-        with progress_container:
-            st.info("⏳ Analyzing species where user is top identifier globally...")
-            identifier_progress = st.empty()
-            
-        # Create progress callback function
-        def identifier_progress_callback(message):
-            identifier_progress.text(message)
-            
+        # Identifier analysis with detailed progress
+        st.info("⏳ Analyzing species where user is top identifier globally...")
+        identifier_progress_bar = st.progress(0)
+        identifier_status = st.empty()
+        identifier_time_remaining = st.empty()
+        
+        def identifier_progress_callback(current, total, time_remaining):
+            progress = current / total if total > 0 else 0
+            identifier_progress_bar.progress(progress)
+            identifier_status.text(f"Processing species {current} of {total}")
+            if time_remaining > 0:
+                minutes = int(time_remaining // 60)
+                seconds = int(time_remaining % 60)
+                identifier_time_remaining.text(f"Estimated time remaining: {minutes}m {seconds}s")
+            else:
+                identifier_time_remaining.text("")
+        
         # Get species where user is top identifier  
         top_identifier_species = api_client.get_top_identifier_species(user_info['id'], identifier_progress_callback)
-        identifier_progress.success(f"✅ Found {len(top_identifier_species)} species where user is top identifier")
+        identifier_status.success(f"✅ Found {len(top_identifier_species)} species where user is top identifier")
+        identifier_time_remaining.empty()
         
         # Update session state
         st.session_state.user_data = user_info
@@ -86,8 +103,9 @@ def fetch_user_data(username):
         st.session_state.top_observer_species = top_observer_species
         st.session_state.top_identifier_species = top_identifier_species
         
-        # Clear progress messages
-        progress_container.empty()
+        # Clear progress elements
+        observer_progress_bar.empty()
+        identifier_progress_bar.empty()
         
         return True
         

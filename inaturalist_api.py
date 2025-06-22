@@ -104,11 +104,23 @@ class iNaturalistAPI:
             user_species = self.get_user_observations_by_species(user_id, 50)
             
             top_observer_species = []
+            total_species = len(user_species)
+            start_time = time.time()
             
             # For each species, check if this user is the top observer
             for i, species in enumerate(user_species):
-                if progress_callback and i % 5 == 0:  # Update progress every 5 species
-                    progress_callback(f"Checking species {i+1} of {len(user_species)}...")
+                current_time = time.time()
+                elapsed_time = current_time - start_time
+                
+                if progress_callback:
+                    # Calculate estimated time remaining
+                    if i > 0:
+                        avg_time_per_species = elapsed_time / i
+                        remaining_species = total_species - i
+                        estimated_remaining = avg_time_per_species * remaining_species
+                        progress_callback(i, total_species, estimated_remaining)
+                    else:
+                        progress_callback(i, total_species, 0)
                 
                 taxon = species.get('taxon', {})
                 taxon_id = taxon.get('id')
@@ -135,6 +147,10 @@ class iNaturalistAPI:
                 
                 # Add delay to be respectful to API
                 time.sleep(0.15)
+            
+            # Final progress update
+            if progress_callback:
+                progress_callback(total_species, total_species, 0)
             
             return top_observer_species
             
@@ -181,11 +197,23 @@ class iNaturalistAPI:
             user_species = self.get_user_identifications_by_species(user_id, 50)
             
             top_identifier_species = []
+            total_species = len(user_species)
+            start_time = time.time()
             
             # For each species, check if this user is the top identifier
             for i, species in enumerate(user_species):
-                if progress_callback and i % 5 == 0:  # Update progress every 5 species
-                    progress_callback(f"Checking species {i+1} of {len(user_species)}...")
+                current_time = time.time()
+                elapsed_time = current_time - start_time
+                
+                if progress_callback:
+                    # Calculate estimated time remaining
+                    if i > 0:
+                        avg_time_per_species = elapsed_time / i
+                        remaining_species = total_species - i
+                        estimated_remaining = avg_time_per_species * remaining_species
+                        progress_callback(i, total_species, estimated_remaining)
+                    else:
+                        progress_callback(i, total_species, 0)
                 
                 taxon = species.get('taxon', {})
                 taxon_id = taxon.get('id')
@@ -212,6 +240,10 @@ class iNaturalistAPI:
                 
                 # Add delay to be respectful to API
                 time.sleep(0.15)
+            
+            # Final progress update
+            if progress_callback:
+                progress_callback(total_species, total_species, 0)
             
             return top_identifier_species
             
