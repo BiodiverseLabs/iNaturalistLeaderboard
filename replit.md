@@ -96,7 +96,7 @@ The application is configured for deployment on Replit's platform:
   - Function-specific error context (user ID, taxon ID, data sizes)
   - Database error logging with operation details and data metrics
   - Set delays to 2 seconds between API calls (30 calls per minute, conservative rate)
-  - Added exponential backoff retry logic for 429 errors (5s, 10s, 15s)
+  - Added exponential backoff retry logic for 429 errors (10s, 20s, 30s)
 
 - **June 22, 2025 - Added Top 3 Global Rankings**: Expanded dashboard to show comprehensive ranking data:
   - Added #2 and #3 global ranking panels for both observers and identifiers

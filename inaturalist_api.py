@@ -47,7 +47,7 @@ class iNaturalistAPI:
                         pass
                     
                     if attempt < retry_count - 1:
-                        wait_time = (attempt + 1) * 5  # Exponential backoff: 5s, 10s, 15s
+                        wait_time = (attempt + 1) * 10  # Exponential backoff: 10s, 20s, 30s
                         st.warning(f"Rate limit hit. Waiting {wait_time} seconds before retry...")
                         time.sleep(wait_time)
                         continue
