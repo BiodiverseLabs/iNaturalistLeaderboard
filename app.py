@@ -30,6 +30,10 @@ if 'cached_data' not in st.session_state:
     st.session_state.cached_data = False
 if 'show_cached_users' not in st.session_state:
     st.session_state.show_cached_users = False
+if 'processing_user' not in st.session_state:
+    st.session_state.processing_user = None
+if 'processing_complete' not in st.session_state:
+    st.session_state.processing_complete = False
 
 # Initialize API client
 api_client = iNaturalistAPI()
@@ -369,22 +373,21 @@ def main():
                     st.info("🔄 Processing user data - this may take several minutes...")
                     st.write(f"DEBUG: About to call fetch_user_data('{username}')")
                     
-                    # Create a placeholder for processing status
-                    status_placeholder = st.empty()
+                    # Set processing state
+                    st.session_state.processing_user = username
+                    st.session_state.processing_complete = False
                     
                     # Process the user data
                     try:
-                        with status_placeholder.container():
-                            st.write("Processing in progress...")
-                            st.write(f"DEBUG: Calling fetch_user_data with username: {username}")
-                            success = fetch_user_data(username)
-                            st.write(f"DEBUG: fetch_user_data returned: {success}")
-                            
+                        st.write(f"DEBUG: Calling fetch_user_data with username: {username}")
+                        success = fetch_user_data(username)
+                        st.write(f"DEBUG: fetch_user_data returned: {success}")
+                        
                         if success:
                             st.success(f"✅ Processing completed successfully for {username}!")
-                            st.write("DEBUG: About to call st.rerun()")
+                            st.session_state.processing_complete = True
                             st.balloons()
-                            st.rerun()
+                            # Don't call st.rerun() immediately - let user see the results
                         else:
                             st.error("❌ Processing failed - please check the logs")
                             st.write("DEBUG: fetch_user_data returned False")
@@ -397,6 +400,14 @@ def main():
                 elif admin_password:  # Only show error if password was entered
                     st.error("❌ Invalid admin password")
                     st.write(f"DEBUG: Invalid password entered: '{admin_password}'")
+        
+        # Add a button to view results if processing completed
+        if st.session_state.processing_complete:
+            if st.button("📊 View Results", type="primary"):
+                st.session_state.processing_user = None
+                st.session_state.processing_complete = False
+                st.rerun()
+        
         return
     elif search_button and not username:
         st.warning("Please enter a username to search.")
