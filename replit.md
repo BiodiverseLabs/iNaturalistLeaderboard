@@ -84,6 +84,12 @@ The application is configured for deployment on Replit's platform:
   - Database shows 66+ species already cached, dramatically reducing future API calls
   - Automatic cleanup of old cache entries after 7 days
 
+- **June 22, 2025 - Removed Species Limit**: Enhanced analysis to include complete user data:
+  - Removed 500 species limit to analyze all user observations and identifications
+  - Updated limits from 500 to 10,000 species to capture comprehensive user activity
+  - More thorough ranking analysis covering users' entire iNaturalist history
+  - Updated UI messaging to reflect "all species" instead of "up to 500 species"
+
 - **June 22, 2025 - Improved CSV Export Layout**: Enhanced user interface for data export:
   - Moved CSV export buttons to the user header area for better visibility and accessibility
   - Export buttons now appear next to the username instead of in the section headers

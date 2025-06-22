@@ -147,7 +147,7 @@ class iNaturalistAPI:
             st.error(f"Error fetching observation count: {str(e)}")
             return 0
     
-    def get_user_observations_by_species(self, user_id: int, limit: int = 200) -> List[Dict]:
+    def get_user_observations_by_species(self, user_id: int, limit: int = 10000) -> List[Dict]:
         """Get user's observations grouped by species"""
         try:
             # Check cache first
@@ -196,8 +196,8 @@ class iNaturalistAPI:
         Returns a dictionary with rankings: {1: [...], 2: [...], 3: [...]}
         """
         try:
-            # Get user's observed species
-            user_species = self.get_user_observations_by_species(user_id, 500)
+            # Get user's observed species (all records)
+            user_species = self.get_user_observations_by_species(user_id, 10000)
             
             # Initialize completely fresh rankings
             rankings = {1: [], 2: [], 3: []}
@@ -268,7 +268,7 @@ class iNaturalistAPI:
             st.error(f"Observer rankings failed: {' | '.join(error_details)}")
             return {1: [], 2: [], 3: []}
 
-    def get_user_identifications_by_species(self, user_id: int, limit: int = 200) -> List[Dict]:
+    def get_user_identifications_by_species(self, user_id: int, limit: int = 10000) -> List[Dict]:
         """Get user's identifications grouped by species"""
         try:
             # Check cache first
@@ -317,8 +317,8 @@ class iNaturalistAPI:
         Returns a dictionary with rankings: {1: [...], 2: [...], 3: [...]}
         """
         try:
-            # Get user's identified species
-            user_species = self.get_user_identifications_by_species(user_id, 500)
+            # Get user's identified species (all records)
+            user_species = self.get_user_identifications_by_species(user_id, 10000)
             
             # Initialize completely fresh rankings
             rankings = {1: [], 2: [], 3: []}
