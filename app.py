@@ -30,6 +30,8 @@ if 'cached_data' not in st.session_state:
     st.session_state.cached_data = False
 if 'admin_authenticated' not in st.session_state:
     st.session_state.admin_authenticated = False
+if 'pending_username' not in st.session_state:
+    st.session_state.pending_username = None
 
 # Initialize API client
 api_client = iNaturalistAPI()
@@ -291,6 +293,7 @@ def main():
             if st.button("Reset", use_container_width=True):
                 reset_session_state()
                 st.session_state.admin_authenticated = False
+                st.session_state.pending_username = None
                 st.rerun()
     
     # Handle search
@@ -308,11 +311,9 @@ def main():
                 if submit_auth:
                     if password == "booty":
                         st.session_state.admin_authenticated = True
-                        st.success("✅ Authentication successful! Processing user data...")
-                        reset_session_state()
-                        if fetch_user_data(username):
-                            st.success(f"Data loaded successfully for user: {username}")
-                            st.rerun()
+                        st.session_state.pending_username = username  # Store username to process after auth
+                        st.success("✅ Authentication successful!")
+                        st.rerun()  # Rerun to trigger processing
                     else:
                         st.error("❌ Incorrect password")
         else:
@@ -323,6 +324,17 @@ def main():
                 st.rerun()
     elif search_button and not username:
         st.warning("Please enter a username to search.")
+    
+    # Handle processing after authentication
+    if (st.session_state.admin_authenticated and 
+        hasattr(st.session_state, 'pending_username') and 
+        st.session_state.pending_username):
+        username_to_process = st.session_state.pending_username
+        st.session_state.pending_username = None  # Clear the pending username
+        reset_session_state()
+        if fetch_user_data(username_to_process):
+            st.success(f"Data loaded successfully for user: {username_to_process}")
+            st.rerun()
     
     # Display user data if available
     if st.session_state.user_data:
