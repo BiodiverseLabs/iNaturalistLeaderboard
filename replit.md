@@ -76,6 +76,12 @@ The application is configured for deployment on Replit's platform:
 
 ## Recent Changes
 
+- **June 22, 2025 - Fixed CSV Export Top 100 Rankings**: Corrected comprehensive rankings data collection:
+  - Fixed ranking functions to include 'all_top100' key with complete ranking data
+  - CSV exports now show all species where user ranks 1-100 globally, not just top 3
+  - Updated session state to preserve comprehensive ranking data for CSV generation
+  - Ensures CSV files contain the full scope of user's global standings
+
 - **June 22, 2025 - Standardized API Rate Limiting**: Fixed inconsistent delays causing rate limit issues:
   - Changed pagination API delays from 0.1s to 1.3s for consistent rate limiting
   - All API calls now use uniform 1.3-second delays (50 calls per minute)

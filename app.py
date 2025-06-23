@@ -201,12 +201,14 @@ def fetch_user_data(username):
         st.session_state.observer_rankings = {
             1: list(observer_rankings[1]),  # Create new lists, not references
             2: list(observer_rankings[2]),
-            3: list(observer_rankings[3])
+            3: list(observer_rankings[3]),
+            'all_top100': list(observer_rankings.get('all_top100', []))
         }
         st.session_state.identifier_rankings = {
             1: list(identifier_rankings[1]),
             2: list(identifier_rankings[2]),
-            3: list(identifier_rankings[3])
+            3: list(identifier_rankings[3]),
+            'all_top100': list(identifier_rankings.get('all_top100', []))
         }
         st.session_state.cached_data = False
         
