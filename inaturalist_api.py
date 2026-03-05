@@ -190,33 +190,48 @@ class iNaturalistAPI:
             st.error(f"Error fetching user observations by species: {str(e)}")
             return []
     
+    def _should_skip_species(self, user_count: int, global_obs_count: int) -> bool:
+        """
+        Determine if a species can be skipped based on the ratio of user's count
+        to global observations. If the user's count is too small relative to the
+        global total, they almost certainly aren't in the top 100.
+        
+        Uses a conservative threshold: skip only if user has less than
+        global_count / 10,000. This provides a large safety margin since even
+        the #100 ranked observer typically has far more than 1/10,000th of
+        total observations.
+        """
+        if global_obs_count is None or global_obs_count <= 0:
+            return False
+        if global_obs_count < 200:
+            return False
+        threshold = max(1, global_obs_count / 10000)
+        return user_count < threshold
+
     def get_observer_rankings(self, user_id: int, progress_callback=None) -> Dict[int, List[Dict]]:
         """
         Get species where the user is ranked in top 3 globally as an observer.
         Returns a dictionary with rankings: {1: [...], 2: [...], 3: [...]}
         """
         try:
-            # Get user's observed species (all records)
             user_species = self.get_user_observations_by_species(user_id, 10000)
             
-            # Initialize completely fresh rankings and comprehensive data
             rankings = {1: [], 2: [], 3: []}
-            all_rankings = []  # Store all top 100 rankings for CSV export
+            all_rankings = []
             total_species = len(user_species)
             processed_taxon_ids = set()
+            skipped_count = 0
             
             for i, species in enumerate(user_species):
                 taxon = species.get('taxon', {})
                 taxon_id = taxon.get('id')
                 user_count = species.get('count', 0)
                 
-                # Skip invalid species
                 if not taxon_id or user_count == 0:
                     if progress_callback:
                         progress_callback(i + 1, total_species, 0)
                     continue
                 
-                # Skip already processed taxons to prevent duplicates
                 if taxon_id in processed_taxon_ids:
                     if progress_callback:
                         progress_callback(i + 1, total_species, 0)
@@ -224,11 +239,16 @@ class iNaturalistAPI:
                 
                 processed_taxon_ids.add(taxon_id)
                 
-                # Update progress
+                global_obs_count = taxon.get('observations_count', 0)
+                if self._should_skip_species(user_count, global_obs_count):
+                    skipped_count += 1
+                    if progress_callback:
+                        progress_callback(i + 1, total_species, 0)
+                    continue
+                
                 if progress_callback:
                     progress_callback(i + 1, total_species, 0)
                 
-                # Get global leaderboard for this species
                 observers = self.get_species_observers_leaderboard(taxon_id)
                 
                 if not observers:
@@ -259,9 +279,11 @@ class iNaturalistAPI:
                     if user_global_rank <= 3:
                         rankings[user_global_rank].append(species_data)
             
-            # Final progress update
             if progress_callback:
                 progress_callback(total_species, total_species, 0)
+            
+            if skipped_count > 0:
+                st.info(f"⚡ Skipped {skipped_count} species where user's count was too low to rank in top 100 (saved ~{skipped_count * 1.3:.0f}s of API calls)")
             
             rankings['all_top100'] = all_rankings
             return rankings
@@ -325,27 +347,24 @@ class iNaturalistAPI:
         Returns a dictionary with rankings: {1: [...], 2: [...], 3: [...]}
         """
         try:
-            # Get user's identified species (all records)
             user_species = self.get_user_identifications_by_species(user_id, 10000)
             
-            # Initialize completely fresh rankings and comprehensive data
             rankings = {1: [], 2: [], 3: []}
-            all_rankings = []  # Store all top 100 rankings for CSV export
+            all_rankings = []
             total_species = len(user_species)
             processed_taxon_ids = set()
+            skipped_count = 0
             
             for i, species in enumerate(user_species):
                 taxon = species.get('taxon', {})
                 taxon_id = taxon.get('id')
                 user_count = species.get('count', 0)
                 
-                # Skip invalid species
                 if not taxon_id or user_count == 0:
                     if progress_callback:
                         progress_callback(i + 1, total_species, 0)
                     continue
                 
-                # Skip already processed taxons to prevent duplicates
                 if taxon_id in processed_taxon_ids:
                     if progress_callback:
                         progress_callback(i + 1, total_species, 0)
@@ -353,11 +372,16 @@ class iNaturalistAPI:
                 
                 processed_taxon_ids.add(taxon_id)
                 
-                # Update progress
+                global_obs_count = taxon.get('observations_count', 0)
+                if self._should_skip_species(user_count, global_obs_count):
+                    skipped_count += 1
+                    if progress_callback:
+                        progress_callback(i + 1, total_species, 0)
+                    continue
+                
                 if progress_callback:
                     progress_callback(i + 1, total_species, 0)
                 
-                # Get global leaderboard for this species
                 identifiers = self.get_species_identifiers_leaderboard(taxon_id)
                 
                 if not identifiers:
@@ -388,9 +412,11 @@ class iNaturalistAPI:
                     if user_global_rank <= 3:
                         rankings[user_global_rank].append(species_data)
             
-            # Final progress update
             if progress_callback:
                 progress_callback(total_species, total_species, 0)
+            
+            if skipped_count > 0:
+                st.info(f"⚡ Skipped {skipped_count} species where user's count was too low to rank in top 100 (saved ~{skipped_count * 1.3:.0f}s of API calls)")
             
             rankings['all_top100'] = all_rankings
             return rankings

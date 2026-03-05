@@ -76,6 +76,14 @@ The application is configured for deployment on Replit's platform:
 
 ## Recent Changes
 
+- **June 22, 2025 - Smart Species Skip Optimization**: Added intelligent filtering to skip API calls for species where the user has no chance of ranking in the top 100:
+  - Compares user's observation count against global observation count for each species
+  - Skips species where user's count is less than global_count / 10,000 (very conservative threshold)
+  - Species with fewer than 200 global observations are never skipped (always checked)
+  - Reports how many species were skipped and estimated time saved
+  - Can reduce API calls by 30-60% for users with many casual observations
+  - GitHub repo: https://github.com/BiodiverseLabs/iNaturalistLeaderboard
+
 - **June 22, 2025 - Fixed CSV Export Top 100 Rankings**: Corrected comprehensive rankings data collection:
   - Fixed ranking functions to include 'all_top100' key with complete ranking data
   - CSV exports now show all species where user ranks 1-100 globally, not just top 3
