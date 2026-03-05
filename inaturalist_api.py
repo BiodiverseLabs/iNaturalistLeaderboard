@@ -263,6 +263,7 @@ class iNaturalistAPI:
             if progress_callback:
                 progress_callback(total_species, total_species, 0)
             
+            rankings['all_top100'] = all_rankings
             return rankings
             
         except Exception as e:
@@ -391,6 +392,7 @@ class iNaturalistAPI:
             if progress_callback:
                 progress_callback(total_species, total_species, 0)
             
+            rankings['all_top100'] = all_rankings
             return rankings
             
         except Exception as e:
